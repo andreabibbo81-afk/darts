@@ -137,6 +137,24 @@ html.nogap nav.tabs svg{margin-bottom:4px}
 html.nogap .gwrap>*+*{margin-top:12px}
 html.nogap .botview #ovCap .bd span{margin:0 4px}
 html.nogap .back{margin-right:8px}
+
+/* pulsanti impaginati senza grid/flex dentro <button> (iOS meno recenti non li supportano) */
+.item{display:block;position:relative;padding:18px 36px 18px 56px;min-height:72px}
+.item .n{position:absolute;left:0;top:50%;transform:translateY(-50%)}
+.item>svg{position:absolute;right:4px;top:50%;margin-top:-10px}
+.bgrid button{display:block;position:relative;padding:10px 12px}
+.bgrid button b{display:inline-block}
+.bgrid button span{position:absolute;right:12px;top:10px}
+.bgrid button i{display:block;margin-top:2px}
+.bgrid .none{text-align:center}
+nav.tabs button{display:block;text-align:center}
+nav.tabs svg{display:block;margin:0 auto 4px}
+.pill{display:inline-block;line-height:1.2}
+.pill .dot{display:inline-block;vertical-align:middle;margin-right:8px}
+.chip{display:inline-block}
+.chip .ord{vertical-align:middle;margin-right:6px}
+.chip .x{margin-left:6px}
+.back{display:inline-block}
 /* bot */
 #ovCap{display:none}
 .botview #ovCap{display:block;text-align:center;margin-bottom:10px;font-size:18px}
