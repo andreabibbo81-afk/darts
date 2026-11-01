@@ -20,6 +20,7 @@ body{user-select:none;-webkit-user-select:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 input{font:inherit}
 .view{position:fixed;inset:0;display:flex;flex-direction:column;overflow-x:hidden;padding:calc(16px + var(--st)) calc(20px + var(--sr)) 0 calc(20px + var(--sl));overflow-y:auto}
+.view>*{flex-shrink:0}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:40px}
 .kicker{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
 .mut{color:var(--mut)}
@@ -123,6 +124,19 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .toast{position:fixed;left:50%;top:calc(14px + var(--st));transform:translateX(-50%);background:var(--txt);color:var(--bg);font-weight:700;border-radius:999px;padding:10px 16px;z-index:20;font-size:14px;max-width:90vw;text-align:center}
 
 /* statistiche */
+.tgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.tgrid button{border:1px solid var(--line);border-radius:10px;padding:11px 0;font-weight:800;font-size:16px}
+.tgrid button.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
+.tgrid button.bl{grid-column:span 2}
+.ps.dn{opacity:.45}
+.slot.ok{border-color:var(--ok)}
+.sumt table,.sum table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+.sumt td,.sumt th{padding:7px 3px;border-top:1px solid var(--line);text-align:right}
+.sumt th{color:var(--mut);font-weight:600;font-size:10px;letter-spacing:.5px;text-transform:uppercase}
+.sumt td:first-child,.sumt th:first-child{text-align:left}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dgrid div{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center}
+.dgrid b{font-size:15px}.dgrid span{font-size:12px;color:var(--mut)}
 .sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .sgrid>div{background:var(--bg);padding:12px}
 .games .g{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
@@ -152,10 +166,10 @@ input[type=range]{width:100%;accent-color:var(--red)}
   <h1 class="hero">Cosa<br>alleni<br><em>oggi?</em></h1>
   <div class="small" id="homeSub">Collega la board e scegli il gioco.</div>
   <div class="list">
-    <button class="item" data-go="setup"><span class="n" style="color:var(--red)">01</span><span><span class="nm">501</span><span class="ds">301 · 501 · 701, chiusure consigliate</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-    <button class="item" disabled><span class="n">02</span><span><span class="nm">100 frecce</span><span class="ds">In arrivo</span></span><span></span></button>
-    <button class="item" disabled><span class="n">03</span><span><span class="nm">Giro del mondo</span><span class="ds">In arrivo</span></span><span></span></button>
-    <button class="item" disabled><span class="n">04</span><span><span class="nm">Bob's 27</span><span class="ds">In arrivo</span></span><span></span></button>
+    <button class="item" data-go="setup" data-mode="x01"><span class="n" style="color:var(--red)">01</span><span><span class="nm">501</span><span class="ds">301 · 501 · 701, chiusure consigliate</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="setup" data-mode="h100"><span class="n">02</span><span><span class="nm">100 frecce</span><span class="ds">Un numero a scelta: punti e dove finiscono le frecce</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="setup" data-mode="rtc"><span class="n">03</span><span><span class="nm">Giro del mondo</span><span class="ds">Dall'1 al 20, poi il bull</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="setup" data-mode="b27"><span class="n">04</span><span><span class="nm">Bob's 27</span><span class="ds">Tutti i doppi, si parte da 27</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
   </div>
   <div class="kpis" id="homeKpi"></div>
   <div class="grow"></div>
@@ -165,13 +179,19 @@ input[type=range]{width:100%;accent-color:var(--red)}
 <!-- SETUP 501 -->
 <section class="view" id="vSetup" hidden>
   <div class="top"><button class="back" data-go="home">← Indietro</button><button class="pill" data-conn><span class="dot"></span><span data-conntxt>Granboard</span></button></div>
-  <h2 class="t">Nuova partita</h2>
+  <h2 class="t" id="setupTitle">Nuova partita</h2>
+  <div id="optX01">
   <div class="sect">Punteggio</div>
   <div class="seg" data-opt="start"><button data-v="301">301</button><button data-v="501">501</button><button data-v="701">701</button></div>
   <div class="sect">Entrata</div>
   <div class="seg" data-opt="inRule"><button data-v="open">Libera</button><button data-v="double">Doppio</button></div>
   <div class="sect">Chiusura</div>
   <div class="seg" data-opt="outRule"><button data-v="single">Libera</button><button data-v="double">Doppio</button><button data-v="master">Master</button></div>
+  </div>
+  <div id="optH100"><div class="sect">Numero su cui tiri</div><div class="tgrid" id="tGrid"></div>
+    <div class="small" style="margin-top:8px">Triplo 3 punti · doppio 2 · singolo 1 (sul bull: 25 = 1, 50 = 2). 100 frecce, massimo 300 punti. Le statistiche segnano anche gli altri numeri colpiti.</div></div>
+  <div id="optRtc" class="small" style="margin-top:14px">Colpisci i numeri in ordine dall'1 al 20, poi il bull. Vale qualsiasi parte del numero (singolo, doppio o triplo). Vince chi finisce il giro per primo.</div>
+  <div id="optB27" class="small" style="margin-top:14px">Si parte da 27 punti. Tre frecce su ogni doppio, da D1 a D20 e poi il bull. Ogni doppio preso aggiunge il suo valore (D1 = 2, D20 = 40, bull = 50); se in una volée non ne prendi nessuno, il valore si toglie. Sotto zero la partita finisce.</div>
   <div class="sect">Giocatori · tocca in ordine di tiro (max 4)</div>
   <div class="chips" id="pChips"></div>
   <form class="addrow" id="addP"><input id="addName" maxlength="14" placeholder="Nuovo giocatore" autocomplete="off"><button class="btn">Aggiungi</button></form>
@@ -203,9 +223,12 @@ input[type=range]{width:100%;accent-color:var(--red)}
 <section class="view" id="vStats" hidden>
   <div class="top"><span class="kicker">Statistiche</span><button class="pill" data-conn><span class="dot"></span><span data-conntxt>Granboard</span></button></div>
   <h2 class="t">I numeri</h2>
-  <div class="chips" id="sChips"></div>
-  <div class="sect">501 · partite concluse</div>
+  <div class="chips" id="sModes"></div>
+  <div class="chips" id="sChips" style="margin-top:10px"></div>
+  <div id="sTgtWrap" hidden><div class="sect">Numero</div><div class="chips" id="sTargets"></div></div>
+  <div class="sect" id="sTitle">501 · partite concluse</div>
   <div class="sgrid" id="sGrid"></div>
+  <div id="sExtra"></div>
   <div class="sect">Ultime partite</div>
   <div class="games" id="sGames"></div>
   <div class="sect">Copia di sicurezza</div>
@@ -265,7 +288,7 @@ var ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 var settings=Object.assign({vol:70,fatBull:false,voice:false,vibe:true},load("gb_settings",{}));
-var setup=Object.assign({start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
+var setup=Object.assign({mode:"x01",h100t:20,start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
 var players=load("gb_players",["Io"]);
 var games=load("gb_games",[]);
 function saveSettings(){store("gb_settings",settings);}
@@ -327,9 +350,11 @@ var SND={
   bust:function(t){tone(330,t,0.3,"sawtooth",0.2,250,9);tone(220,t+0.32,0.55,"sawtooth",0.2,150,9);},
   checkout:function(t){var m=[N.G5,N.B5,N.D6,N.G6];m.forEach(function(f,i){tone(f,t+i*0.1,0.1,"square",0.18);});
     [N.G5,N.B5,N.D6].forEach(function(f){tone(f*2,t+0.42,0.8,"square",0.09,null,5);});tone(N.G5/2,t+0.42,0.8,"triangle",0.22);noise(t+0.42,0.6,0.06,7000);},
+  coin:function(t){tone(N.B5,t,0.06,"square",0.2);tone(N.E6,t+0.06,0.25,"square",0.2);},
+  miss:function(t){tone(N.E5,t,0.12,"triangle",0.25);tone(N.C5,t+0.13,0.25,"triangle",0.25);},
   over:function(t){[N.G5,N.E5,N.C5].forEach(function(f,i){tone(f,t+i*0.18,0.18,"square",0.16);});tone(N.C5/2,t+0.54,0.6,"triangle",0.25);}
 };
-function play(k,t){try{if(!ac())return;SND[k](t||0);}catch(e){}}
+function play(k,t){if(quiet)return;try{if(!ac())return;SND[k](t||0);}catch(e){}}
 function say(txt){
   if(!settings.voice||!window.speechSynthesis)return;
   try{var u=new SpeechSynthesisUtterance(txt);u.lang="it-IT";u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
@@ -465,7 +490,7 @@ function show(id){
 }
 document.addEventListener("click",function(e){
   var t=e.target.closest("[data-tab]");if(t){show(t.dataset.tab);return;}
-  var g=e.target.closest("[data-go]");if(g){show(g.dataset.go==="home"?"vHome":"vSetup");return;}
+  var g=e.target.closest("[data-go]");if(g){if(g.dataset.mode){setup.mode=g.dataset.mode;store("gb_setup",setup);}show(g.dataset.go==="home"?"vHome":"vSetup");return;}
   var c=e.target.closest("[data-conn]");if(c){if(bt.state==="on")show("vSet");else connect();}
 });
 
@@ -477,6 +502,10 @@ function renderHome(){
 
 /* ================= setup ================= */
 function renderSetup(){
+  var m=setup.mode||"x01";
+  $("setupTitle").innerHTML="Nuova partita<br><span style='color:var(--red)'>"+esc(MODE_NAMES[m])+"</span>";
+  $("optX01").hidden=m!=="x01";$("optH100").hidden=m!=="h100";$("optRtc").hidden=m!=="rtc";$("optB27").hidden=m!=="b27";
+  $("tGrid").innerHTML=RTC.map(function(n){return '<button data-t="'+n+'" class="'+(n===setup.h100t?"on":"")+(n===25?" bl":"")+'">'+tName(n)+'</button>';}).join("");
   document.querySelectorAll("#vSetup .seg").forEach(function(sg){var o=sg.dataset.opt;sg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",String(setup[o])===b.dataset.v);});});
   setup.players=setup.players.filter(function(p){return players.indexOf(p)>=0;});
   $("pChips").innerHTML=players.map(function(p){var i=setup.players.indexOf(p);
@@ -484,6 +513,8 @@ function renderSetup(){
   $("bStart").disabled=!setup.players.length;
 }
 $("vSetup").addEventListener("click",function(e){
+  var tb=e.target.closest("[data-t]");
+  if(tb){setup.h100t=+tb.dataset.t;store("gb_setup",setup);renderSetup();return;}
   var sb=e.target.closest(".seg button");
   if(sb){var o=sb.parentNode.dataset.opt,v=sb.dataset.v;setup[o]=o==="start"?+v:v;store("gb_setup",setup);renderSetup();return;}
   var d=e.target.closest("[data-del]");
@@ -500,20 +531,33 @@ $("addP").addEventListener("submit",function(e){
 });
 $("bStart").onclick=function(){ac();newGame(setup.players.slice());};
 
-/* ================= partita X01 ================= */
-var game=null,undoStack=[];
+/* ================= partite ================= */
+var MODE_NAMES={x01:"501",h100:"100 frecce",rtc:"Giro del mondo",b27:"Bob's 27"};
+var RTC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
+var B27=RTC;
+function tName(n){return n===25?"Bull":String(n);}
+function dName(n){return n===25?"Bull":"D"+n;}
+var game=null,undoStack=[],quiet=false;
 function newTurn(p){return {start:p.score,opened:p.opened,darts:[],bust:false};}
 function newGame(names){
   buildSegs();
-  game={id:Date.now(),start:setup.start,inRule:setup.inRule,outRule:setup.outRule,fatBull:settings.fatBull,
-    players:names.map(function(n){return {name:n,score:setup.start,opened:setup.inRule==="open",turns:[]};}),
+  var m=setup.mode||"x01";
+  game={id:Date.now(),type:m,start:setup.start,inRule:setup.inRule,outRule:setup.outRule,fatBull:settings.fatBull,target:setup.h100t,
+    players:names.map(function(n){var p={name:n,turns:[],done:false};
+      if(m==="x01"){p.score=setup.start;p.opened=setup.inRule==="open";}
+      if(m==="h100"){p.score=0;p.n=0;p.cnt={};}
+      if(m==="rtc"){p.idx=0;p.n=0;p.hits=0;p.per=[];}
+      if(m==="b27"){p.score=27;p.idx=0;p.n=0;p.hits=0;p.per=[];p.out=false;}
+      return p;}),
     cur:0,wait:false,over:false,winner:null,savedId:null};
   game.players[0].turns.push(newTurn(game.players[0]));
-  undoStack=[];show("vGame");play("start");say("Partita "+game.start+", tira "+names[0]);wake();renderGame();
+  undoStack=[];show("vGame");play("start");
+  say(m==="x01"?"Partita "+game.start+", tira "+names[0]:MODE_NAMES[m]+", tira "+names[0]);
+  wake();renderGame();
 }
 function P(){return game.players[game.cur];}
 function T(){var p=P();return p.turns[p.turns.length-1];}
-function snap(){undoStack.push(JSON.stringify(game));if(undoStack.length>300)undoStack.shift();}
+function snap(){undoStack.push(JSON.stringify(game));if(undoStack.length>400)undoStack.shift();}
 function finOK(zi){if(game.outRule==="single")return true;if(game.outRule==="double")return !!zi.dbl;return !!(zi.dbl||zi.trp);}
 function onButton(){
   if(cur!=="vGame"){return;}
@@ -522,8 +566,16 @@ function onButton(){
 }
 function throwDart(z){
   if(!game||game.over)return;
-  if(game.wait){toast("Togli le freccette e premi il pulsante della board");play("out");return;}
+  if(game.wait){
+    if(game.type==="x01"){toast("Togli le freccette e premi il pulsante della board");play("out");return;}
+    nextPlayer(); // negli allenamenti la freccia successiva fa partire da sola la nuova volée
+    if(!game||game.over)return;
+  }
   snap();
+  if(game.type==="x01")dartX01(z);else dartOther(z);
+  renderGame(true);
+}
+function dartX01(z){
   var p=P(),t=T(),zi=zone(z),raw=val(zi),before=p.score,cnt=raw;
   if(!p.opened){if(zi.dbl){p.opened=true;}else cnt=0;}
   var after=before-cnt;
@@ -531,12 +583,11 @@ function throwDart(z){
   vib(35);
   if(after<0||(after===1&&game.outRule!=="single")||(after===0&&!finOK(zi))){
     t.bust=true;p.score=t.start;p.opened=t.opened;game.wait=true;
-    play("bust");say("Sballato");renderGame(true);return;
+    play("bust");say("Sballato");return;
   }
   p.score=after;
   if(after===0){
-    game.over=true;game.winner=game.cur;game.wait=true;play(hitSound(zi));play("checkout",0.25);say(p.name+" chiude "+(t.start)+"!");
-    renderGame(true);saveGame();setTimeout(showSummary,1400);return;
+    game.winner=game.cur;play(hitSound(zi));say(p.name+" chiude "+(t.start)+"!");endGame();return;
   }
   play(hitSound(zi));
   if(t.darts.length===3){
@@ -544,18 +595,83 @@ function throwDart(z){
     if(tot===180)play("max",0.2);else if(tot>=140)play("ton40",0.2);else if(tot>=100)play("ton",0.2);
     say(tot===0?"Nessun punto":String(tot));
   }
-  renderGame(true);
+}
+function dartOther(z){
+  var g=game,p=P(),t=T(),zi=zone(z),num,hit=false,v=0;
+  if(!quiet)vib(35);
+  p.n++;
+  if(g.type==="h100"){
+    num=g.target;
+    if(z!=="MISS"&&zi.seg===num){hit=true;v=zi.bull?(zi.dbl?2:1):zi.mult;}
+    p.cnt[z]=(p.cnt[z]||0)+1;p.score+=v;
+    t.darts.push({z:z,v:v,hit:hit});
+    play(hit?hitSound(zi):"out");
+    if(p.n>=100)p.done=true;
+    if(t.darts.length===3||p.done)endVolley();
+    return;
+  }
+  if(g.type==="rtc"){
+    num=RTC[p.idx];hit=num===25?!!zi.bull:(zi.seg===num&&!zi.bull);
+    p.per[p.idx]=(p.per[p.idx]||0)+1;
+    t.darts.push({z:z,v:hit?1:0,hit:hit,tg:num});
+    if(hit){p.hits++;p.idx++;play("coin");if(p.idx>=RTC.length){p.done=true;g.winner=g.cur;say(p.name+" ha finito il giro!");endGame();return;}}
+    else play(z==="MISS"?"out":"single");
+    if(t.darts.length===3)endVolley();
+    return;
+  }
+  if(g.type==="b27"){
+    num=B27[p.idx];var dv=num===25?50:num*2;
+    hit=num===25?zi.id==="DBULL":(!!zi.dbl&&!zi.bull&&zi.seg===num);
+    t.darts.push({z:z,v:hit?dv:0,hit:hit,tg:num});
+    if(hit){p.score+=dv;p.hits++;p.per[p.idx]=(p.per[p.idx]||0)+1;play("coin");}
+    else play(z==="MISS"?"out":"single");
+    if(t.darts.length===3)endVolley();
+  }
+}
+function endVolley(){
+  var g=game,p=P(),t=T();
+  if(g.type==="h100"){
+    var tot=t.darts.reduce(function(s,d){return s+d.v;},0);
+    if(tot===9)play("max",0.2);else if(tot>=7)play("ton40",0.2);else if(tot>=5)play("ton",0.2);
+  }
+  if(g.type==="b27"){
+    var num=B27[p.idx],dv=num===25?50:num*2,h=t.darts.filter(function(d){return d.hit;}).length;
+    if(!h){p.score-=dv;t.minus=dv;play("miss",0.15);}
+    p.idx++;
+    if(p.score<0){p.out=true;p.done=true;play("over",0.4);say(p.name+" è sotto zero");}
+    else if(p.idx>=B27.length){p.done=true;}
+  }
+  g.wait=true;
+  if(g.players.every(function(q){return q.done;}))endGame();
+}
+function endGame(){
+  var g=game;g.over=true;g.wait=true;
+  if(g.winner==null){
+    var best=-1e9;g.players.forEach(function(q,i){if(q.score>best){best=q.score;g.winner=i;}});
+  }
+  var allOut=g.type==="b27"&&g.players.every(function(q){return q.out;});
+  play(allOut?"over":"checkout",0.3);
+  saveGame();setTimeout(showSummary,1500);
 }
 function nextPlayer(){
   if(!game||game.over)return;
-  var t=T(),p=P();
-  if(!game.wait&&!t.darts.length&&game.players.length===1){return;}
+  var t=T(),p=P(),n=game.players.length;
+  if(!game.wait&&!t.darts.length&&n===1){return;}
   snap();
-  while(t.darts.length<3&&!t.bust)t.darts.push({z:"MISS",v:0,b:p.score}); // frecce non registrate = 0
-  if(!game.wait){var tot=t.start-p.score;if(tot>=100)play(tot===180?"max":tot>=140?"ton40":"ton");}
-  game.wait=false;game.cur=(game.cur+1)%game.players.length;
+  if(!game.wait){
+    if(game.type==="x01"){
+      while(t.darts.length<3&&!t.bust)t.darts.push({z:"MISS",v:0,b:p.score}); // frecce non registrate = 0
+      var tot=t.start-p.score;if(tot>=100)play(tot===180?"max":tot>=140?"ton40":"ton");
+    }else{
+      quiet=true;while(!game.wait&&!game.over)dartOther("MISS");quiet=false;
+      if(game.over){renderGame();return;}
+    }
+  }
+  game.wait=false;
+  var i=game.cur;for(var k=0;k<n;k++){i=(i+1)%n;if(!game.players[i].done)break;}
+  game.cur=i;
   var np=P();np.turns.push(newTurn(np));
-  play("change");if(game.players.length>1)say("Tocca a "+np.name);renderGame();
+  play("change");if(n>1)say("Tocca a "+np.name);renderGame();
 }
 function undo(){
   if(!undoStack.length){toast("Niente da annullare");return;}
@@ -569,32 +685,73 @@ function pStats(p){
   p.turns.forEach(function(t,i){d+=t.darts.length;if(i<3){fd+=t.darts.length;first+=t.bust?0:(t.start-(i<p.turns.length-1?p.turns[i+1].start:p.score));}});
   return {pts:pts,darts:d,avg:d?pts/d*3:0,f9:fd?first/fd*3:0};
 }
+function hBreak(cnt,t){ // 100 frecce: tripli, doppi, singoli del numero scelto e altri numeri colpiti
+  var o={T:0,D:0,S:0,Si:0,So:0,miss:cnt.MISS||0,oth:{},darts:0};
+  for(var z in cnt){var c=cnt[z];o.darts+=c;if(z==="MISS")continue;var zi=zone(z);
+    if(zi.seg===t){if(zi.trp)o.T+=c;else if(zi.dbl)o.D+=c;else{o.S+=c;if(/i$/.test(z))o.Si+=c;else if(/o$/.test(z))o.So+=c;}}
+    else{var k=zi.bull?"Bull":String(zi.seg);o.oth[k]=(o.oth[k]||0)+c;}}
+  o.on=o.T+o.D+o.S;
+  o.others=Object.keys(o.oth).map(function(k){return [k,o.oth[k]];}).sort(function(a,b){return b[1]-a[1];});
+  return o;
+}
+function pct(a,b){return b?fmt(a/b*100,0)+"%":"—";}
+function sideInfo(q){
+  var t=game.type;
+  if(t==="x01")return [q.score,"media "+fmt(pStats(q).avg)];
+  if(t==="h100")return [q.score,q.n+"/100 frecce"];
+  if(t==="rtc")return [q.done?"✓":tName(RTC[q.idx]),q.n+" frecce"];
+  return [q.score,q.out?"sotto zero":q.done?"finito":dName(B27[q.idx])];
+}
 function renderGame(anim){
   if(!game)return;
-  var p=P(),t=T(),many=game.players.length>1;
+  var g=game,ty=g.type,p=P(),t=T(),many=g.players.length>1;
   $("gWrap").classList.toggle("solo",!many);
-  $("gTitle").textContent=game.start+" · "+({single:"chiusura libera",double:"double out",master:"master out"})[game.outRule]+(game.inRule==="double"?" · double in":"");
-  $("gScores").innerHTML=game.players.map(function(q,i){var s=pStats(q);
-    return '<div class="ps'+(i===game.cur?" cur":"")+'"><div class="pn">'+esc(q.name)+'</div><div class="pv">'+q.score+'</div><div class="pa">media '+fmt(s.avg)+'</div></div>';}).join("");
-  $("gName").textContent=many?p.name:(game.over?"Chiusa!":"Turno "+p.turns.length);
-  var big=$("gBig");big.textContent=t.bust?"SBALLATO":p.score;big.classList.toggle("bust",t.bust);
-  big.style.fontSize=t.bust?"min(16vw,90px)":"";
+  $("gTitle").textContent=ty==="x01"?g.start+" · "+({single:"chiusura libera",double:"double out",master:"master out"})[g.outRule]+(g.inRule==="double"?" · double in":"")
+    :ty==="h100"?"100 frecce · "+tName(g.target):MODE_NAMES[ty];
+  $("gScores").innerHTML=g.players.map(function(q,i){var a=sideInfo(q);
+    return '<div class="ps'+(i===g.cur?" cur":"")+(q.done&&!g.over?" dn":"")+'"><div class="pn">'+esc(q.name)+'</div><div class="pv">'+a[0]+'</div><div class="pa">'+a[1]+'</div></div>';}).join("");
+  var lab={x01:"Turno "+p.turns.length,h100:"Punti",rtc:"Colpisci il",b27:"Punteggio"}[ty];
+  $("gName").textContent=many?p.name:(g.over?"Finita!":lab);
+  var big=$("gBig"),bv;
+  if(ty==="x01")bv=t.bust?"SBALLATO":p.score;
+  else if(ty==="rtc")bv=p.done?"✓":tName(RTC[p.idx]).toUpperCase();
+  else bv=p.score;
+  big.textContent=bv;big.classList.toggle("bust",!!t.bust||(ty==="b27"&&p.out));
+  big.style.fontSize=(t.bust||(ty==="rtc"&&RTC[p.idx]===25&&!p.done))?"min(16vw,90px)":"";
   var sl="";for(var i=0;i<3;i++){var d=t.darts[i];
-    if(d){var zi=zone(d.z);sl+='<div class="slot'+(anim&&i===t.darts.length-1?" hit":"")+'"><b>'+(d.z==="MISS"?"—":zi.lab)+'</b><i>'+(d.z==="MISS"?"fuori":(d.v===0&&!t.bust&&d.z!=="MISS"?"non vale":d.v+" pt"))+'</i></div>';}
-    else sl+='<div class="slot'+(i===t.darts.length&&!game.wait?" nx":"")+'"><b></b><i></i></div>';}
+    if(d){var zi=zone(d.z),sub;
+      if(ty==="x01")sub=d.z==="MISS"?"fuori":(d.v===0&&!t.bust?"non vale":d.v+" pt");
+      else if(ty==="rtc")sub=d.hit?"preso":(d.z==="MISS"?"fuori":"—");
+      else sub=d.hit?"+"+d.v:(d.z==="MISS"?"fuori":"0");
+      sl+='<div class="slot'+(anim&&i===t.darts.length-1?" hit":"")+(d.hit?" ok":"")+'"><b>'+(d.z==="MISS"?"—":zi.lab)+'</b><i>'+sub+'</i></div>';}
+    else sl+='<div class="slot'+(i===t.darts.length&&!g.wait?" nx":"")+'"><b></b><i></i></div>';}
   $("gSlots").innerHTML=sl;
-  var tot=t.bust?0:t.start-p.score;
-  $("gTT").innerHTML=t.darts.length?'Turno: <b>'+tot+'</b>':"&nbsp;";
+  var tt="&nbsp;";
+  if(ty==="x01"){if(t.darts.length)tt='Turno: <b>'+(t.bust?0:t.start-p.score)+'</b>';}
+  else if(ty==="h100")tt='Freccia <b>'+p.n+'</b> di 100';
+  else if(ty==="rtc")tt='Frecce: <b>'+p.n+'</b> · numero '+Math.min(p.idx+1,21)+' di 21';
+  else if(ty==="b27"){if(t.minus)tt='Nessun doppio: <b>−'+t.minus+'</b>';else if(t.darts.length){var gain=t.darts.reduce(function(s,d){return s+d.v;},0);tt='Volée: <b>+'+gain+'</b>';}}
+  $("gTT").innerHTML=tt;
   var h="";
-  if(game.over)h='<span class="msg">Partita chiusa</span>';
-  else if(game.wait)h='<span class="msg w">Togli le freccette · premi il pulsante</span>';
-  else if(!p.opened)h='<span class="msg mut">Serve un doppio per entrare</span>';
-  else{var left=3-t.darts.length,co=p.score<=180?checkout(p.score,left,game.outRule):null;
-    if(co)h=co.map(function(c){return '<span class="co">'+c+'</span>';}).join("");}
+  if(g.over)h='<span class="msg">Partita finita</span>';
+  else if(g.wait)h='<span class="msg w">Togli le freccette · premi il pulsante</span>';
+  else if(ty==="x01"){
+    if(!p.opened)h='<span class="msg mut">Serve un doppio per entrare</span>';
+    else{var left=3-t.darts.length,co=p.score<=180?checkout(p.score,left,g.outRule):null;
+      if(co)h=co.map(function(c){return '<span class="co">'+c+'</span>';}).join("");}
+  }
+  else if(ty==="h100")h='<span class="small">Bersaglio</span><span class="co">'+tName(g.target)+'</span>';
+  else if(ty==="rtc")h='<span class="small">Bersaglio</span><span class="co">'+tName(RTC[p.idx])+'</span>';
+  else if(ty==="b27"){var nn=B27[p.idx],vv=nn===25?50:nn*2;h='<span class="small">Bersaglio</span><span class="co">'+dName(nn)+'</span><span class="small">± '+vv+'</span>';}
   $("gHint").innerHTML=h;
-  var s=pStats(p);$("gStat").innerHTML='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Prime 9 <b>'+fmt(s.f9)+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';
-  $("gNext").textContent=game.over?"Riepilogo":(many?"Cambio":"Prossimo");
-  $("gNext").classList.toggle("pulse",game.wait&&!game.over);
+  var st="";
+  if(ty==="x01"){var s=pStats(p);st='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Prime 9 <b>'+fmt(s.f9)+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';}
+  else if(ty==="h100"){var b=hBreak(p.cnt,g.target);st=(g.target===25?'':'<span>T <b>'+b.T+'</b></span>')+'<span>D <b>'+b.D+'</b></span><span>S <b>'+b.S+'</b></span><span>A segno <b>'+pct(b.on,p.n)+'</b></span>';}
+  else if(ty==="rtc")st='<span>A segno <b>'+pct(p.hits,p.n)+'</b></span>';
+  else st='<span>Doppi presi <b>'+p.hits+'</b> su <b>'+p.n+'</b> frecce</span>';
+  $("gStat").innerHTML=st;
+  $("gNext").textContent=g.over?"Riepilogo":(many?"Cambio":"Prossimo");
+  $("gNext").classList.toggle("pulse",g.wait&&!g.over);
 }
 $("gUndo").onclick=undo;$("mUndo").onclick=undo;
 $("gNext").onclick=function(){if(game&&game.over)showSummary();else nextPlayer();};
@@ -630,58 +787,140 @@ $("mMiss").onclick=function(){throwDart("MISS");};
 })();
 
 /* ---- riepilogo ---- */
+function brkHtml(b,n,t){
+  var rows=[];
+  if(t!==25)rows.push(["Triplo "+tName(t),b.T]);
+  rows.push(["Doppio "+tName(t),b.D]);
+  rows.push([t===25?"Bull 25":"Singolo "+tName(t)+(b.S?" <span class='mut'>(int. "+b.Si+" · est. "+b.So+")</span>":""),b.S]);
+  var h='<table><tr><th>Sul '+tName(t)+'</th><th>Frecce</th><th>%</th></tr>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+pct(r[1],n)+'</td></tr>';}).join("")+
+    '<tr><td><b>Totale a segno</b></td><td><b>'+b.on+'</b></td><td><b>'+pct(b.on,n)+'</b></td></tr></table>';
+  var oth=b.others.slice();if(b.miss)oth.push(["Fuori",b.miss]);
+  if(oth.length)h+='<table><tr><th>Altri numeri colpiti</th><th>Frecce</th><th>%</th></tr>'+oth.map(function(r){return '<tr><td>'+(r[0]==="Fuori"||r[0]==="Bull"?r[0]:"Il "+r[0])+'</td><td>'+r[1]+'</td><td>'+pct(r[1],n)+'</td></tr>';}).join("")+'</table>';
+  return h;
+}
 function showSummary(){
   if(!game)return;$("ovBoard").hidden=true;
-  var w=game.players[game.winner];
-  var rows=game.players.map(function(q){var s=pStats(q),hi=0,c100=0,c140=0,c180=0;
-    q.turns.forEach(function(t,i){var sc=t.bust?0:t.start-(i<q.turns.length-1?q.turns[i+1].start:q.score);hi=Math.max(hi,sc);if(sc===180)c180++;else if(sc>=140)c140++;else if(sc>=100)c100++;});
-    return '<tr><td>'+esc(q.name)+'</td><td>'+fmt(s.avg)+'</td><td>'+fmt(s.f9)+'</td><td>'+s.darts+'</td><td>'+hi+'</td><td>'+c100+'/'+c140+'/'+c180+'</td></tr>';}).join("");
-  var lt=w.turns[w.turns.length-1];
-  $("sumBox").innerHTML='<div class="kl">Vince</div><h3>'+esc(w.name)+'</h3><div class="small">Chiusura da '+lt.start+' in '+pStats(w).darts+' frecce</div>'+
-    '<div class="tw"><table><tr><th>Giocatore</th><th>Media</th><th>Prime 9</th><th>Frecce</th><th>Max</th><th>100·140·180</th></tr>'+rows+'</table></div>'+
-    '<div class="row"><button class="btn" id="sumUndo">Annulla chiusura</button><button class="btn" id="sumMenu">Menu</button><button class="btn pri" id="sumAgain" style="flex:1">Rivincita</button></div>';
+  var g=game,ty=g.type,w=g.players[g.winner],many=g.players.length>1,head="",body="";
+  if(ty==="x01"){
+    var rows=g.players.map(function(q){var s=pStats(q),hi=0,c100=0,c140=0,c180=0;
+      q.turns.forEach(function(t,i){var sc=t.bust?0:t.start-(i<q.turns.length-1?q.turns[i+1].start:q.score);hi=Math.max(hi,sc);if(sc===180)c180++;else if(sc>=140)c140++;else if(sc>=100)c100++;});
+      return '<tr><td>'+esc(q.name)+'</td><td>'+fmt(s.avg)+'</td><td>'+fmt(s.f9)+'</td><td>'+s.darts+'</td><td>'+hi+'</td><td>'+c100+'/'+c140+'/'+c180+'</td></tr>';}).join("");
+    var lt=w.turns[w.turns.length-1];
+    head='<div class="kl">Vince</div><h3>'+esc(w.name)+'</h3><div class="small">Chiusura da '+lt.start+' in '+pStats(w).darts+' frecce</div>';
+    body='<table><tr><th>Giocatore</th><th>Media</th><th>Prime 9</th><th>Frecce</th><th>Max</th><th>100·140·180</th></tr>'+rows+'</table>';
+  }
+  if(ty==="h100"){
+    head='<div class="kl">100 frecce sul '+tName(g.target)+(many?' · vince '+esc(w.name):'')+'</div><h3>'+w.score+' punti</h3><div class="small">Massimo possibile '+(g.target===25?200:300)+'</div>';
+    body=g.players.map(function(q){var b=hBreak(q.cnt,g.target);return (many?'<div class="sect">'+esc(q.name)+' · '+q.score+' punti</div>':'')+brkHtml(b,q.n,g.target);}).join("");
+  }
+  if(ty==="rtc"){
+    head='<div class="kl">Giro del mondo'+(many?' · vince':'')+'</div><h3>'+(many?esc(w.name):w.n+' frecce')+'</h3><div class="small">'+(many?'Giro completato in '+w.n+' frecce':'Dall\'1 al bull, a segno il '+pct(w.hits,w.n))+'</div>';
+    body='<table><tr><th>Giocatore</th><th>Arrivato a</th><th>Frecce</th><th>A segno</th></tr>'+g.players.map(function(q){return '<tr><td>'+esc(q.name)+'</td><td>'+(q.done?"finito":tName(RTC[q.idx]))+'</td><td>'+q.n+'</td><td>'+pct(q.hits,q.n)+'</td></tr>';}).join("")+'</table>';
+    var hard=w.per.map(function(c,i){return [tName(RTC[i]),c];}).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+    body+='<div class="small">Più difficili: '+hard.map(function(h){return h[0]+' ('+h[1]+' frecce)';}).join(", ")+'</div>';
+  }
+  if(ty==="b27"){
+    head='<div class="kl">Bob\'s 27'+(many?' · vince '+esc(w.name):'')+'</div><h3>'+w.score+'</h3><div class="small">'+(w.out?'Sotto zero su '+dName(B27[w.idx-1]):'Giro dei doppi completato')+'</div>';
+    body='<table><tr><th>Giocatore</th><th>Punti</th><th>Doppi presi</th><th>%</th><th>Arrivato a</th></tr>'+g.players.map(function(q){return '<tr><td>'+esc(q.name)+'</td><td>'+q.score+'</td><td>'+q.hits+'</td><td>'+pct(q.hits,q.n)+'</td><td>'+(q.out?dName(B27[q.idx-1]):"fine")+'</td></tr>';}).join("")+'</table>';
+  }
+  $("sumBox").innerHTML=head+'<div class="tw">'+body+'</div>'+
+    '<div class="row"><button class="btn" id="sumUndo">Annulla ultima</button><button class="btn" id="sumMenu">Menu</button><button class="btn pri" id="sumAgain" style="flex:1">Rivincita</button></div>';
   $("ovSum").hidden=false;
   $("sumUndo").onclick=undo;$("sumMenu").onclick=quit;
-  $("sumAgain").onclick=function(){var n=game.players.map(function(q){return q.name;});n.push(n.shift());$("ovSum").hidden=true;
-    setup.start=game.start;setup.inRule=game.inRule;setup.outRule=game.outRule;newGame(n);};
+  $("sumAgain").onclick=function(){var n=game.players.map(function(q){return q.name;});if(n.length>1)n.push(n.shift());$("ovSum").hidden=true;
+    setup.mode=game.type;setup.start=game.start;setup.inRule=game.inRule;setup.outRule=game.outRule;if(game.target)setup.h100t=game.target;newGame(n);};
 }
 
 /* ================= statistiche ================= */
 function isCoDart(b,rule){if(rule==="single")return b<=60||b===50;if(rule==="double")return b===50||(b<=40&&b%2===0&&b>1);return b<=60||b===50;}
 function saveGame(){
-  var rec={id:game.id,date:new Date().toISOString(),start:game.start,inRule:game.inRule,outRule:game.outRule,players:game.players.map(function(q,i){
-    var s=pStats(q),c100=0,c140=0,c180=0,coA=0,turns=[];
-    q.turns.forEach(function(t,k){var sc=t.bust?0:t.start-(k<q.turns.length-1?q.turns[k+1].start:q.score);turns.push(sc);if(sc===180)c180++;else if(sc>=140)c140++;else if(sc>=100)c100++;
-      if(game.outRule==="double")t.darts.forEach(function(d){if(isCoDart(d.b,"double"))coA++;});});
-    return {name:q.name,won:i===game.winner,pts:s.pts,darts:s.darts,f9:s.f9,turns:turns,c100:c100,c140:c140,c180:c180,coA:coA,co:i===game.winner?q.turns[q.turns.length-1].start:0};
-  })};
+  var g=game,rec={id:g.id,date:new Date().toISOString(),type:g.type};
+  if(g.type==="x01"){
+    rec.start=g.start;rec.inRule=g.inRule;rec.outRule=g.outRule;
+    rec.players=g.players.map(function(q,i){
+      var s=pStats(q),c100=0,c140=0,c180=0,coA=0,turns=[];
+      q.turns.forEach(function(t,k){var sc=t.bust?0:t.start-(k<q.turns.length-1?q.turns[k+1].start:q.score);turns.push(sc);if(sc===180)c180++;else if(sc>=140)c140++;else if(sc>=100)c100++;
+        if(g.outRule==="double")t.darts.forEach(function(d){if(isCoDart(d.b,"double"))coA++;});});
+      return {name:q.name,won:i===g.winner,pts:s.pts,darts:s.darts,f9:s.f9,turns:turns,c100:c100,c140:c140,c180:c180,coA:coA,co:i===g.winner?q.turns[q.turns.length-1].start:0};
+    });
+  }
+  if(g.type==="h100"){rec.target=g.target;rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,cnt:q.cnt};});}
+  if(g.type==="rtc")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner,done:q.done,darts:q.n,hits:q.hits,reached:q.idx,per:q.per};});
+  if(g.type==="b27")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,score:q.score,out:q.out,reached:q.idx,hits:q.hits,darts:q.n,per:q.per};});
   games.push(rec);store("gb_games",games);game.savedId=rec.id;
 }
+function gType(g){return g.type||"x01";}
+function mineOf(name,type){var r=[];games.forEach(function(g){if(gType(g)!==type)return;g.players.forEach(function(p){if(p.name===name)r.push([g,p]);});});return r;}
 function statsFor(name){
   var o={games:0,wins:0,pts:0,darts:0,f9s:0,best:null,hiCo:0,c100:0,c140:0,c180:0,coA:0,coH:0,hi:0};
-  games.forEach(function(g){g.players.forEach(function(p){if(p.name!==name)return;
+  mineOf(name,"x01").forEach(function(gp){var g=gp[0],p=gp[1];
     o.games++;if(p.won){o.wins++;if(o.best==null||p.darts<o.best)o.best=p.darts;o.hiCo=Math.max(o.hiCo,p.co);}
     o.pts+=p.pts;o.darts+=p.darts;o.f9s+=p.f9;o.c100+=p.c100;o.c140+=p.c140;o.c180+=p.c180;
     if(g.outRule==="double"){o.coA+=p.coA;if(p.won)o.coH++;}
-    p.turns.forEach(function(t){o.hi=Math.max(o.hi,t);});});});
+    p.turns.forEach(function(t){o.hi=Math.max(o.hi,t);});});
   o.avg=o.darts?o.pts/o.darts*3:0;o.f9=o.games?o.f9s/o.games:0;o.coPct=o.coA?o.coH/o.coA*100:null;
   return o;
 }
-var statSel=null;
+var statSel=null,statMode="x01",statTgt=null;
+function cellsHtml(c){return c.map(function(x){return '<div><div class="kl">'+x[0]+'</div><div class="kv">'+x[1]+'</div></div>';}).join("");}
+function dd(g){return new Date(g.date).toLocaleDateString("it-IT",{day:"2-digit",month:"short"});}
 function renderStats(){
   var names=players.slice();games.forEach(function(g){g.players.forEach(function(p){if(names.indexOf(p.name)<0)names.push(p.name);});});
   if(!statSel||names.indexOf(statSel)<0)statSel=names[0];
+  $("sModes").innerHTML=["x01","h100","rtc","b27"].map(function(m){return '<button class="chip'+(m===statMode?" on":"")+'" data-sm="'+m+'">'+MODE_NAMES[m]+'</button>';}).join("");
   $("sChips").innerHTML=names.map(function(n){return '<button class="chip'+(n===statSel?" on":"")+'" data-sp="'+esc(n)+'">'+esc(n)+'</button>';}).join("");
-  var s=statsFor(statSel);
-  var cells=[["Media 3 frecce",fmt(s.avg)],["Prime 9",fmt(s.f9)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
-    ["% chiusura (double out)",s.coPct==null?"—":fmt(s.coPct,0)+"%"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
-  $("sGrid").innerHTML=cells.map(function(c){return '<div><div class="kl">'+c[0]+'</div><div class="kv">'+c[1]+'</div></div>';}).join("");
-  var mine=games.filter(function(g){return g.players.some(function(p){return p.name===statSel;});}).slice(-15).reverse();
-  $("sGames").innerHTML=mine.length?mine.map(function(g){var p=g.players.filter(function(x){return x.name===statSel;})[0],d=new Date(g.date);
-    var vs=g.players.filter(function(x){return x.name!==statSel;}).map(function(x){return x.name;}).join(", ");
-    return '<div class="g"><span>'+d.toLocaleDateString("it-IT",{day:"2-digit",month:"short"})+' · '+g.start+(vs?' vs '+esc(vs):' solo')+(p.won?' · <b style="color:var(--ok)">vinta</b>':'')+'</span><span>media <b>'+fmt(p.darts?p.pts/p.darts*3:0)+'</b> · '+p.darts+' fr.</span></div>';}).join(""):'<div class="small">Ancora nessuna partita conclusa.</div>';
+  var mine=mineOf(statSel,statMode),extra="",list="",cells=[];
+  $("sTgtWrap").hidden=statMode!=="h100";
+  var none='<div class="small">Ancora nessuna partita conclusa.</div>';
+  if(statMode==="x01"){
+    $("sTitle").textContent="501 · partite concluse";
+    var s=statsFor(statSel);
+    cells=[["Media 3 frecce",fmt(s.avg)],["Prime 9",fmt(s.f9)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
+      ["% chiusura (double out)",s.coPct==null?"—":fmt(s.coPct,0)+"%"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
+    list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];var vs=g.players.filter(function(x){return x.name!==statSel;}).map(function(x){return x.name;}).join(", ");
+      return '<div class="g"><span>'+dd(g)+' · '+g.start+(vs?' vs '+esc(vs):' solo')+(p.won?' · <b style="color:var(--ok)">vinta</b>':'')+'</span><span>media <b>'+fmt(p.darts?p.pts/p.darts*3:0)+'</b> · '+p.darts+' fr.</span></div>';}).join("");
+  }
+  if(statMode==="h100"){
+    var tg=[];mine.forEach(function(gp){if(tg.indexOf(gp[0].target)<0)tg.push(gp[0].target);});tg.sort(function(a,b){return a-b;});
+    if(statTgt==null||tg.indexOf(statTgt)<0)statTgt=mine.length?mine[mine.length-1][0].target:null;
+    $("sTargets").innerHTML=tg.length?tg.map(function(t){return '<button class="chip'+(t===statTgt?" on":"")+'" data-st="'+t+'">'+tName(t)+'</button>';}).join(""):'<span class="small">—</span>';
+    var sel=mine.filter(function(gp){return gp[0].target===statTgt;}),cnt={},pts=0,best=0,dts=0;
+    sel.forEach(function(gp){var p=gp[1];pts+=p.pts;best=Math.max(best,p.pts);dts+=p.darts;for(var z in p.cnt)cnt[z]=(cnt[z]||0)+p.cnt[z];});
+    var b=hBreak(cnt,statTgt);
+    $("sTitle").textContent="100 frecce"+(statTgt!=null?" sul "+tName(statTgt):"");
+    cells=[["Sessioni",sel.length],["Punti medi",sel.length?fmt(pts/sel.length,0):"—"],["Miglior punteggio",sel.length?best:"—"],["A segno",pct(b.on,dts)]];
+    if(statTgt!==25)cells.push(["Tripli",pct(b.T,dts)]);
+    cells.push(["Doppi",pct(b.D,dts)],["Singoli",pct(b.S,dts)],["Fuori",pct(b.miss,dts)]);
+    if(sel.length)extra='<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>';
+    list=sel.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1],bb=hBreak(p.cnt,g.target);
+      return '<div class="g"><span>'+dd(g)+' · sul '+tName(g.target)+'</span><span><b>'+p.pts+'</b> punti · '+pct(bb.on,p.darts)+'</span></div>';}).join("");
+  }
+  if(statMode==="rtc"){
+    $("sTitle").textContent="Giro del mondo";
+    var fin=mine.filter(function(gp){return gp[1].done;}),bestD=null,sumD=0,h=0,d=0,per=[],perN=[];
+    fin.forEach(function(gp){var p=gp[1];sumD+=p.darts;if(bestD==null||p.darts<bestD)bestD=p.darts;});
+    mine.forEach(function(gp){var p=gp[1];h+=p.hits;d+=p.darts;(p.per||[]).forEach(function(c,i){if(i<p.reached||p.done){per[i]=(per[i]||0)+c;perN[i]=(perN[i]||0)+1;}});});
+    cells=[["Partite / completate",mine.length+" / "+fin.length],["Miglior giro",bestD?bestD+" frecce":"—"],["Media frecce",fin.length?fmt(sumD/fin.length,0):"—"],["A segno",pct(h,d)]];
+    var avg=per.map(function(c,i){return [tName(RTC[i]),perN[i]?c/perN[i]:0];}).filter(function(x){return x[1];}).sort(function(a,b){return b[1]-a[1];});
+    if(avg.length)extra='<div class="sect">Frecce medie per numero (dal più difficile)</div><div class="dgrid">'+avg.map(function(x){return '<div><b>'+x[0]+'</b><span>'+fmt(x[1])+'</span></div>';}).join("")+'</div>';
+    list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+(p.done?' · completato':' · fermo al '+tName(RTC[p.reached]))+'</span><span><b>'+p.darts+'</b> frecce · '+pct(p.hits,p.darts)+'</span></div>';}).join("");
+  }
+  if(statMode==="b27"){
+    $("sTitle").textContent="Bob's 27";
+    var sc=0,bs=null,comp=0,hh=0,dk=0,ph=[],pa=[];
+    mine.forEach(function(gp){var p=gp[1];sc+=p.score;if(bs==null||p.score>bs)bs=p.score;if(!p.out)comp++;hh+=p.hits;dk+=p.darts;
+      for(var i=0;i<p.reached;i++){pa[i]=(pa[i]||0)+1;ph[i]=(ph[i]||0)+((p.per||[])[i]||0);}});
+    cells=[["Partite",mine.length],["Punteggio medio",mine.length?fmt(sc/mine.length,0):"—"],["Record",bs==null?"—":bs],["Completate",mine.length?comp+" su "+mine.length:"—"],["Doppi a segno",pct(hh,dk)]];
+    if(pa.length)extra='<div class="sect">% a segno per doppio</div><div class="dgrid">'+B27.map(function(n,i){return pa[i]?'<div><b>'+dName(n)+'</b><span>'+pct(ph[i],pa[i]*3)+'</span></div>':'';}).join("")+'</div>';
+    list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+(p.out?' · sotto zero su '+dName(B27[p.reached-1]):' · completato')+'</span><span><b>'+p.score+'</b> punti · '+pct(p.hits,p.darts)+'</span></div>';}).join("");
+  }
+  $("sGrid").innerHTML=cellsHtml(cells);
+  $("sExtra").innerHTML=extra;
+  $("sGames").innerHTML=list||none;
 }
 $("sChips").addEventListener("click",function(e){var c=e.target.closest("[data-sp]");if(c){statSel=c.dataset.sp;renderStats();}});
+$("sModes").addEventListener("click",function(e){var c=e.target.closest("[data-sm]");if(c){statMode=c.dataset.sm;renderStats();}});
+$("sTargets").addEventListener("click",function(e){var c=e.target.closest("[data-st]");if(c){statTgt=+c.dataset.st;renderStats();}});
 $("sCopy").onclick=function(){var t=JSON.stringify({players:players,games:games});
   if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("Dati copiati ✓");},function(){toast("Copia non riuscita");});};
 $("sImpBtn").onclick=function(){$("sImp").hidden=!$("sImp").hidden;};
