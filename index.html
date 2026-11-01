@@ -275,6 +275,8 @@ input[type=range]{width:100%;accent-color:var(--acc)}
     <div class="sect" style="margin-top:14px">Ultimo segnale dalla board</div>
     <div class="mono card" id="setLast" style="padding:10px">—</div>
   </div>
+  <div class="sect">Statistiche su più dispositivi</div>
+  <div class="card" id="syncBox"></div>
   <div class="sect">Bull</div>
   <div class="seg" data-set="fatBull"><button data-v="0">25 / 50</button><button data-v="1">50 / 50</button></div>
   <div class="sect">Suoni</div>
@@ -315,7 +317,7 @@ var ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 /* ================= archivio ================= */
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-var settings=Object.assign({vol:70,fatBull:false,voice:false,vibe:true,full:true},load("gb_settings",{}));
+var settings=Object.assign({code:"",vol:70,fatBull:false,voice:false,vibe:true,full:true},load("gb_settings",{}));
 var setup=Object.assign({bot:0,mode:"x01",h100t:20,start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
 var players=load("gb_players",["Io"]);
 var games=load("gb_games",[]);
@@ -718,7 +720,7 @@ function undo(){
   if(!undoStack.length){toast("Niente da annullare");return;}
   var wasSaved=game.savedId;
   game=JSON.parse(undoStack.pop());
-  if(wasSaved&&!game.over){games=games.filter(function(g){return g.id!==wasSaved;});store("gb_games",games);game.savedId=null;}
+  if(wasSaved&&!game.over){games=games.filter(function(g){return g.id!==wasSaved;});store("gb_games",games);game.savedId=null;syncAfterDelete(wasSaved);}
   $("ovSum").hidden=true;renderGame();
 }
 function pStats(p){
@@ -944,7 +946,7 @@ function saveGame(){
   if(g.type==="h100"){rec.target=g.target;rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,cnt:q.cnt};});}
   if(g.type==="rtc")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner,done:q.done,darts:q.n,hits:q.hits,reached:q.idx,per:q.per};});
   if(g.type==="b27")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,score:q.score,out:q.out,reached:q.idx,hits:q.hits,darts:q.n,per:q.per};});
-  games.push(rec);store("gb_games",games);game.savedId=rec.id;
+  games.push(rec);store("gb_games",games);game.savedId=rec.id;syncAfterSave();
 }
 function gType(g){return g.type||"x01";}
 function mineOf(name,type){var r=[];games.forEach(function(g){if(gType(g)!==type)return;g.players.forEach(function(p){if(p.name===name)r.push([g,p]);});});return r;}
@@ -1026,7 +1028,83 @@ $("sCopy").onclick=function(){var t=JSON.stringify({players:players,games:games}
 $("sImpBtn").onclick=function(){$("sImp").hidden=!$("sImp").hidden;};
 $("sImpGo").onclick=function(){try{var d=JSON.parse($("sImpTxt").value);var ids={};games.forEach(function(g){ids[g.id]=1;});var n=0;
   (d.games||[]).forEach(function(g){if(!ids[g.id]){games.push(g);n++;}});(d.players||[]).forEach(function(p){if(players.indexOf(p)<0)players.push(p);});
-  games.sort(function(a,b){return a.id-b.id;});store("gb_games",games);store("gb_players",players);toast(n+" partite importate");$("sImp").hidden=true;renderStats();}catch(e){toast("Testo non valido");}};
+  games.sort(function(a,b){return a.id-b.id;});store("gb_games",games);store("gb_players",players);toast(n+" partite importate");$("sImp").hidden=true;renderStats();syncNow(true);}catch(e){toast("Testo non valido");}};
+
+/* ================= statistiche su più dispositivi (Firebase Firestore, via REST) ================= */
+var FB={key:"AIzaSyCzwM5mlsWK73YifdNJxh8m9K-OZxcc8e4",base:"https://firestore.googleapis.com/v1/projects/darts-granboard/databases/(default)/documents"};
+var sync={busy:false,last:load("gb_sync_last",null),err:""};
+function syncCode(){return (settings.code||"").trim().toUpperCase();}
+function newCode(){var A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",s="DART";for(var g=0;g<3;g++){s+="-";for(var i=0;i<4;i++){var r=new Uint32Array(1);crypto.getRandomValues(r);s+=A[r[0]%A.length];}}return s;}
+function fbUrl(path,q){return FB.base+"/archivi/"+encodeURIComponent(syncCode())+path+"?key="+FB.key+(q||"");}
+async function fbPutGame(g){
+  var r=await fetch(fbUrl("/partite/"+g.id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{dati:{stringValue:JSON.stringify(g)}}})});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+}
+async function fbDelGame(id){var r=await fetch(fbUrl("/partite/"+id),{method:"DELETE"});if(!r.ok&&r.status!==404)throw new Error("HTTP "+r.status);}
+async function fbListGames(){
+  var out=[],tok="";
+  do{
+    var r=await fetch(fbUrl("/partite","&pageSize=300"+(tok?"&pageToken="+encodeURIComponent(tok):"")));
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    var j=await r.json();(j.documents||[]).forEach(function(d){try{out.push(JSON.parse(d.fields.dati.stringValue));}catch(e){}});
+    tok=j.nextPageToken||"";
+  }while(tok);
+  return out;
+}
+async function fbGetPlayers(){var r=await fetch(fbUrl("/info/giocatori"));if(r.status===404)return [];if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();try{return JSON.parse(j.fields.dati.stringValue);}catch(e){return [];}}
+async function fbPutPlayers(p){var r=await fetch(fbUrl("/info/giocatori"),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{dati:{stringValue:JSON.stringify(p)}}})});if(!r.ok)throw new Error("HTTP "+r.status);}
+var pendingDel=load("gb_sync_del",[]);
+async function syncNow(quietly){
+  if(!syncCode()||sync.busy)return;
+  if(!navigator.onLine){sync.err="offline";renderSyncBox();return;}
+  sync.busy=true;sync.err="";renderSyncBox();
+  try{
+    // 1. cancellazioni rimaste in sospeso (es. "Annulla chiusura")
+    for(var i=pendingDel.length-1;i>=0;i--){await fbDelGame(pendingDel[i]);pendingDel.splice(i,1);store("gb_sync_del",pendingDel);}
+    // 2. scarico le partite degli altri dispositivi e le unisco
+    var remote=await fbListGames(),ids={},rids={},added=0;
+    games.forEach(function(g){ids[g.id]=1;});
+    remote.forEach(function(g){rids[g.id]=1;if(!ids[g.id]){games.push(g);ids[g.id]=1;added++;}});
+    games.sort(function(a,b){return a.id-b.id;});store("gb_games",games);
+    // 3. carico quelle che il server non ha ancora
+    var up=games.filter(function(g){return !rids[g.id];});
+    for(var k=0;k<up.length;k++)await fbPutGame(up[k]);
+    // 4. giocatori: unione dei nomi
+    var rp=await fbGetPlayers(),ch=false;
+    rp.forEach(function(n){if(players.indexOf(n)<0){players.push(n);ch=true;}});
+    if(ch)store("gb_players",players);
+    if(rp.length!==players.length||players.some(function(n){return rp.indexOf(n)<0;}))await fbPutPlayers(players);
+    sync.last=Date.now();store("gb_sync_last",sync.last);
+    if(!quietly&&(added||up.length))toast("Sincronizzate: "+added+" partite ricevute, "+up.length+" inviate");
+    if(added&&(cur==="vStats"||cur==="vHome"))show(cur);
+  }catch(e){sync.err=String(e&&e.message||e);if(!quietly)toast("Sincronizzazione non riuscita");}
+  sync.busy=false;renderSyncBox();
+}
+function syncAfterSave(){if(syncCode())syncNow(true);}
+function syncAfterDelete(id){if(!syncCode())return;pendingDel.push(id);store("gb_sync_del",pendingDel);syncNow(true);}
+function renderSyncBox(){
+  var b=$("syncBox");if(!b)return;var c=syncCode();
+  if(!c){
+    b.innerHTML='<div class="small">Con un codice personale le partite si salvano anche online e le ritrovi uguali su telefono, iPad e su ogni dispositivo dove inserisci lo stesso codice.</div>'+
+      '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn pri" id="syNew">Crea il mio codice</button><button class="btn" id="syHave">Ho già un codice</button></div>'+
+      '<form class="addrow" id="syForm" hidden><input id="syIn" placeholder="DART-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters"><button class="btn">Usa</button></form>';
+    $("syNew").onclick=function(){settings.code=newCode();saveSettings();renderSyncBox();syncNow();};
+    $("syHave").onclick=function(){$("syForm").hidden=false;$("syIn").focus();};
+    $("syForm").onsubmit=function(e){e.preventDefault();var v=$("syIn").value.trim().toUpperCase().replace(/\s+/g,"");
+      if(v.length<16){toast("Codice troppo corto: copialo intero");return;}settings.code=v;saveSettings();renderSyncBox();syncNow();};
+    return;
+  }
+  var st=sync.busy?"Sincronizzo…":sync.err?(sync.err==="offline"?"Senza internet: sincronizzo appena torna la rete":"Ultimo tentativo non riuscito ("+esc(sync.err)+")"):sync.last?"Sincronizzato "+new Date(sync.last).toLocaleString("it-IT",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"Mai sincronizzato";
+  b.innerHTML='<div class="kl">Il tuo codice</div><div class="mono" style="font-size:22px;font-weight:700;letter-spacing:1px;color:var(--acc);margin:4px 0 6px;user-select:text">'+esc(c)+'</div>'+
+    '<div class="small">Scrivilo sull\'altro dispositivo (Impostazioni → Ho già un codice). Tienilo per te: chi ha il codice vede e modifica le tue statistiche.</div>'+
+    '<div class="small" style="margin-top:8px">'+st+'</div>'+
+    '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn pri" id="sySync">Sincronizza ora</button><button class="btn" id="syCopy">Copia codice</button><button class="btn" id="syOff">Scollega</button></div>';
+  $("sySync").onclick=function(){syncNow();};
+  $("syCopy").onclick=function(){if(navigator.clipboard)navigator.clipboard.writeText(c).then(function(){toast("Codice copiato ✓");});};
+  var arm=false;$("syOff").onclick=function(){if(!arm){arm=true;this.textContent="Tocca di nuovo per scollegare";return;}settings.code="";saveSettings();renderSyncBox();toast("Dispositivo scollegato: le partite restano anche online");};
+}
+window.addEventListener("online",function(){syncNow(true);});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")syncNow(true);});
 
 /* ================= impostazioni ================= */
 function renderSet(){
@@ -1034,6 +1112,7 @@ function renderSet(){
   document.querySelectorAll("[data-set=fatBull] button").forEach(function(b){b.classList.toggle("on",(settings.fatBull?"1":"0")===b.dataset.v);});
   document.querySelectorAll("[data-sw]").forEach(function(b){b.classList.toggle("on",!!settings[b.dataset.sw]);});
   $("setBT").textContent=btSupport()||"";
+  renderSyncBox();
 }
 $("setVol").oninput=function(){settings.vol=+this.value;$("setVolV").textContent=this.value+"%";if(master)master.gain.value=settings.vol/100;saveSettings();};
 document.querySelectorAll("[data-set=fatBull] button").forEach(function(b){b.onclick=function(){settings.fatBull=b.dataset.v==="1";saveSettings();buildSegs();renderSet();};});
@@ -1042,7 +1121,7 @@ $("setConnBtn").onclick=function(){if(bt.state==="on"&&bt.dev){manualOff=true;bt
 $("setDemo").onclick=function(){ac();play("triple",0);play("triple",0.9);play("triple",1.8);play("max",2.6);play("change",4.6);};
 
 /* ================= avvio ================= */
-buildSegs();setConn("off");show("vHome");autoReconnect();
+buildSegs();setConn("off");show("vHome");autoReconnect();syncNow(true);
 if("serviceWorker" in navigator&&location.protocol==="https:"){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
 })();
 </script>
