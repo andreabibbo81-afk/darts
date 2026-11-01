@@ -489,8 +489,8 @@ var JING={ // [nota, inizio s, durata s, sfuma, volume relativo] - misurati dai 
   ROUND:[["C5",0,.075],["G5",.08,.075],["G5",.2,.1,1,.3]]
 };
 function jingle(k,t){JING[k].forEach(function(x){cnote(NT[x[0]],(t||0)+x[1],x[2],(NG[x[0]]||0.55)*(x[4]||1),x[3]);});}
-JING.TX=[["C4",0,.08],["Eb4",.095,.08],["G4",.19,.22,1]]; // tripli non ancora registrati dalla macchina: suono neutro
-function tripleJingle(n,t){jingle(JING["T"+n]?"T"+n:"TX",t);}
+// solo T20/T19/T18/T17 hanno il suono registrato; gli altri tripli usano il suono iniziale
+function tripleJingle(n,t){if(JING["T"+n])jingle("T"+n,t);else SND.tripleOld(t||0);}
 function playTriple(n,t){if(quiet)return;try{if(!ac())return;tripleJingle(n,t);}catch(e){}}
 function playJ(k,t){if(quiet)return;try{if(!ac())return;jingle(k,t);}catch(e){}}
 function play(k,t){if(quiet)return;try{if(!ac())return;SND[k](t||0);}catch(e){}}
@@ -1395,7 +1395,7 @@ $("setVol").oninput=function(){settings.vol=+this.value;$("setVolV").textContent
 document.querySelectorAll("[data-set=fatBull] button").forEach(function(b){b.onclick=function(){settings.fatBull=b.dataset.v==="1";saveSettings();buildSegs();renderSet();};});
 document.querySelectorAll("[data-sw]").forEach(function(b){b.onclick=function(){settings[b.dataset.sw]=!settings[b.dataset.sw];saveSettings();renderSet();if(b.dataset.sw==="voice")say("Voce attiva");};});
 $("setConnBtn").onclick=function(){if(bt.state==="on"&&bt.dev){manualOff=true;bt.dev.gatt.disconnect();}else connect();};
-$("setDemo").onclick=function(){ac();playTriple(20,0);playTriple(19,1.1);playTriple(18,2.3);playTriple(17,3.4);playJ("BULL",4.6);playJ("DBULL",5.3);playJ("ROUND",6.6);};
+$("setDemo").onclick=function(){ac();playTriple(20,0);playTriple(19,1.1);playTriple(18,2.3);playTriple(17,3.4);playJ("BULL",4.6);playJ("DBULL",5.3);playJ("ROUND",6.6);playTriple(12,7.3);};
 
 /* ================= avvio ================= */
 buildSegs();setConn("off");show("vHome");autoReconnect();syncNow(true);
