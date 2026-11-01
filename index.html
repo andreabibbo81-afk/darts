@@ -19,7 +19,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family
 body{user-select:none;-webkit-user-select:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 input{font:inherit}
-.view{position:fixed;inset:0;display:flex;flex-direction:column;overflow-x:hidden;padding:calc(16px + var(--st)) calc(20px + var(--sr)) 0 calc(20px + var(--sl));overflow-y:auto}
+.view{position:fixed;top:0;right:0;bottom:0;left:0;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;overflow-x:hidden;padding:calc(16px + var(--st)) calc(20px + var(--sr)) 0 calc(20px + var(--sl));overflow-y:auto}
 .view>*{flex-shrink:0}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:40px}
 .kicker{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
@@ -44,7 +44,7 @@ h2.t{margin:22px 0 14px;font-size:44px;line-height:.9;font-weight:900;font-famil
 .kl{font-size:11px;color:var(--mut);letter-spacing:1px;text-transform:uppercase}
 .kv{font-size:30px;font-weight:800;font-family:"Barlow Condensed",sans-serif}
 .grow{flex:1;min-height:24px}
-nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin:0 calc(-20px - var(--sr)) 0 calc(-20px - var(--sl));padding:10px 0 calc(14px + var(--sb));position:sticky;bottom:0;background:var(--bg)}
+nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin:0 calc(-20px - var(--sr)) 0 calc(-20px - var(--sl));padding:10px 0 calc(14px + var(--sb));position:-webkit-sticky;position:sticky;bottom:0;background:var(--bg)}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
 nav.tabs button.on{color:var(--txt);font-weight:700}
 nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8}
@@ -64,7 +64,7 @@ nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1
 .btn{border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-weight:700}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:var(--ink);font-weight:800}
 .btn.wide{width:100%;padding:18px;font-size:20px;letter-spacing:1px;text-transform:uppercase;font-family:"Barlow Condensed",sans-serif;font-weight:900}
-.stick{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:20px 0 calc(16px + var(--sb));margin-top:auto}
+.stick{position:-webkit-sticky;position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:20px 0 calc(16px + var(--sb));margin-top:auto}
 .row{display:flex;gap:8px;align-items:center}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
 .small{font-size:13px;color:var(--mut);line-height:1.4}
@@ -116,7 +116,7 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .gstat b{color:var(--txt);font-size:14px}
 
 /* overlay */
-.ov{position:fixed;inset:0;background:rgba(5,12,32,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + var(--st)) 16px calc(16px + var(--sb));z-index:10}
+.ov{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(5,12,32,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + var(--st)) 16px calc(16px + var(--sb));z-index:10}
 .ov svg{width:min(92vw,62vh);height:auto;touch-action:manipulation}
 .ov .row{margin-top:12px}
 .sum{background:var(--bg);border-top:4px solid var(--acc);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(460px,100%);max-height:100%;overflow:auto}
@@ -127,8 +127,16 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .sum td:first-child,.sum th:first-child{text-align:left}
 .toast{position:fixed;left:50%;top:calc(14px + var(--st));transform:translateX(-50%);background:var(--acc);color:var(--ink);font-weight:700;border-radius:999px;padding:10px 16px;z-index:20;font-size:14px;max-width:90vw;text-align:center}
 
-/* iPad / iPhone dentro Bluefy o Safari: la barra del browser copre il fondo della pagina */
-html.iosb .view,html.iosb .ov{bottom:var(--iosbar,64px)}
+/* iPad e telefoni con browser più vecchi: niente "gap" nei flex, uso i margini */
+html.nogap .row>*+*,html.nogap .addrow>*+*{margin-left:8px}
+html.nogap .chips>*{margin:0 8px 8px 0}
+html.nogap .pill .dot,html.nogap .chip .ord{margin-right:8px}
+html.nogap .hint>*{margin:3px}
+html.nogap .gstat>*+*{margin-left:18px}
+html.nogap nav.tabs svg{margin-bottom:4px}
+html.nogap .gwrap>*+*{margin-top:12px}
+html.nogap .botview #ovCap .bd span{margin:0 4px}
+html.nogap .back{margin-right:8px}
 /* bot */
 #ovCap{display:none}
 .botview #ovCap{display:block;text-align:center;margin-bottom:10px;font-size:18px}
@@ -164,6 +172,7 @@ html.iosb .view,html.iosb .ov{bottom:var(--iosbar,64px)}
 @media (orientation:landscape) and (max-height:860px){
   .view{padding-top:calc(8px + var(--st))}
   h1.hero{font-size:52px;margin-top:14px}
+  h1.hero br{display:none}
   .gwrap{display:grid;grid-template-columns:minmax(200px,30%) 1fr;grid-template-rows:1fr auto;gap:10px 16px;margin-top:6px}
   .scores{grid-column:1;grid-row:1;grid-template-columns:1fr;align-content:start;overflow:auto}
   .solo .scores{display:none}
@@ -190,7 +199,7 @@ html.iosb .view,html.iosb .ov{bottom:var(--iosbar,64px)}
 <!-- HOME -->
 <section class="view" id="vHome">
   <div class="top"><span class="kicker">Allenamento</span><button class="pill" data-conn><span class="dot"></span><span data-conntxt>Granboard</span></button></div>
-  <h1 class="hero">Cosa<br>alleni<br><em>oggi?</em></h1>
+  <h1 class="hero">Cosa<br> alleni<br> <em>oggi?</em></h1>
   <div class="small" id="homeSub">Collega la board e scegli il gioco.</div>
   <div class="list">
     <button class="item" data-go="setup" data-mode="x01"><span class="n" style="color:var(--acc)">01</span><span><span class="nm">501</span><span class="ds">301 · 501 · 701, chiusure consigliate</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
@@ -312,7 +321,10 @@ html.iosb .view,html.iosb .ov{bottom:var(--iosbar,64px)}
 "use strict";
 (function(){var ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
   var sa=window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
-  if(ios&&!sa)document.documentElement.classList.add("iosb");})();
+  if(ios&&!sa)document.documentElement.classList.add("iosb");
+  try{var d=document.createElement("div");d.style.cssText="display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden";
+    d.appendChild(document.createElement("div"));d.appendChild(document.createElement("div"));document.body.appendChild(d);
+    if(d.scrollHeight!==1)document.documentElement.classList.add("nogap");d.parentNode.removeChild(d);}catch(e){}})();
 /* ================= costanti ================= */
 var SVC="442f1570-8a00-9a28-cbe1-e1d4212d53eb";
 // mappa ricavata dalla scansione della tua Granboard (31/10/2026)
