@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0B0B0B">
+<meta name="theme-color" content="#0A1A3F">
 <title>Darts Granboard</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-:root{--bg:#0B0B0B;--card:#141413;--txt:#F4F2EE;--mut:#9A968F;--line:#2A2927;--red:#E63B2E;--ok:#3ECF8E;--warn:#FFB020;
+:root{--bg:#0A1A3F;--card:#11265A;--txt:#FFFFFF;--mut:#9DB0DA;--line:#22397A;--acc:#FFD400;--ink:#0A1A3F;--red:#FF5A4E;--ok:#3ECF8E;--warn:#FFD400;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:"Archivo","Arial Narrow",system-ui,sans-serif;overscroll-behavior:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:"Barlow",system-ui,sans-serif;overscroll-behavior:none}
 body{user-select:none;-webkit-user-select:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 input{font:inherit}
@@ -24,25 +24,25 @@ input{font:inherit}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:40px}
 .kicker{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
 .mut{color:var(--mut)}
-.pill{display:flex;align-items:center;gap:8px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:8px 12px;white-space:nowrap}
+.pill{background:var(--bg);display:flex;align-items:center;gap:8px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:8px 12px;white-space:nowrap}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}
 .pill.on .dot{background:var(--ok)}
 .pill.busy .dot{background:var(--warn);animation:pu .8s infinite alternate}
 .pill.err .dot{background:var(--red)}
 @keyframes pu{to{opacity:.3}}
-h1.hero{margin:40px 0 6px;font-size:76px;line-height:.88;font-weight:900;font-stretch:62%;letter-spacing:-1px;text-transform:uppercase}
-h1.hero em{font-style:normal;color:var(--red)}
-h2.t{margin:22px 0 14px;font-size:44px;line-height:.9;font-weight:900;font-stretch:62%;text-transform:uppercase}
+h1.hero{margin:40px 0 6px;font-size:76px;line-height:.88;font-weight:900;font-family:"Barlow Condensed",sans-serif;letter-spacing:-1px;text-transform:uppercase}
+h1.hero em{font-style:normal;color:var(--acc)}
+h2.t{margin:22px 0 14px;font-size:44px;line-height:.9;font-weight:900;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase}
 .list{display:flex;flex-direction:column;border-bottom:1px solid var(--line);margin-top:20px}
 .item{display:grid;grid-template-columns:44px 1fr 24px;align-items:center;gap:12px;padding:18px 0;border-top:1px solid var(--line);text-align:left;width:100%}
 .item .n{font-size:13px;font-weight:600;color:var(--mut)}
-.item .nm{display:block;font-size:30px;font-weight:800;font-stretch:75%;line-height:1;text-transform:uppercase}
+.item .nm{display:block;font-size:30px;font-weight:800;font-family:"Barlow Condensed",sans-serif;line-height:1;text-transform:uppercase}
 .item .ds{display:block;font-size:13px;color:var(--mut);margin-top:3px}
 .item:disabled{opacity:.35}
-.item:not(:disabled):active{background:#1a1918}
+.item:not(:disabled):active{background:var(--card)}
 .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
 .kl{font-size:11px;color:var(--mut);letter-spacing:1px;text-transform:uppercase}
-.kv{font-size:30px;font-weight:800;font-stretch:75%}
+.kv{font-size:30px;font-weight:800;font-family:"Barlow Condensed",sans-serif}
 .grow{flex:1;min-height:24px}
 nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin:0 calc(-20px - var(--sr)) 0 calc(-20px - var(--sl));padding:10px 0 calc(14px + var(--sb));position:sticky;bottom:0;background:var(--bg)}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
@@ -53,17 +53,17 @@ nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1
 .seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .seg button{flex:1;padding:13px 6px;font-weight:700;font-size:15px;border-left:1px solid var(--line)}
 .seg button:first-child{border-left:0}
-.seg button.on{background:var(--txt);color:var(--bg)}
+.seg button.on{background:var(--acc);color:var(--ink)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.chip.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
-.chip .ord{font-size:11px;background:var(--red);color:#fff;border-radius:999px;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
+.chip.on{background:var(--acc);color:var(--ink);border-color:var(--acc)}
+.chip .ord{font-size:11px;background:var(--ink);color:var(--acc);border-radius:999px;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
 .chip .x{color:var(--mut);font-weight:400;padding-left:4px}
 .addrow{display:flex;gap:8px;margin-top:10px}
 .addrow input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--txt);padding:12px;user-select:text}
 .btn{border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-weight:700}
-.btn.pri{background:var(--red);border-color:var(--red);color:#fff}
-.btn.wide{width:100%;padding:18px;font-size:20px;letter-spacing:1px;text-transform:uppercase;font-stretch:75%;font-weight:900}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--ink);font-weight:800}
+.btn.wide{width:100%;padding:18px;font-size:20px;letter-spacing:1px;text-transform:uppercase;font-family:"Barlow Condensed",sans-serif;font-weight:900}
 .stick{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:20px 0 calc(16px + var(--sb));margin-top:auto}
 .row{display:flex;gap:8px;align-items:center}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
@@ -71,65 +71,83 @@ nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
 .flash{animation:fl .5s}
 @keyframes fl{from{background:#3ECF8E44}}
-input[type=range]{width:100%;accent-color:var(--red)}
+input[type=range]{width:100%;accent-color:var(--acc)}
 .toggle{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
 .sw{width:50px;height:30px;border-radius:999px;background:var(--line);position:relative;transition:.15s;flex:none}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--txt);transition:.15s}
-.sw.on{background:var(--red)}.sw.on::after{left:23px}
+.sw.on{background:var(--acc)}.sw.on::after{left:23px}
 
 /* ---- partita ---- */
 #vGame{padding-bottom:calc(12px + var(--sb))}
 .gwrap{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;margin-top:10px}
 .scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
-.ps{border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
-.ps.cur{border-color:var(--txt);background:var(--card)}
+.ps{border:1px solid var(--line);background:var(--card);border-radius:4px;padding:8px 10px;min-width:0}
+.ps.cur{border-color:var(--acc);background:var(--acc);color:var(--ink)}
+.ps.cur .pa{color:var(--ink)}
 .ps .pn{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ps .pv{font-size:34px;font-weight:900;font-stretch:70%;line-height:1}
+.ps .pv{font-size:34px;font-weight:900;font-family:"Barlow Condensed",sans-serif;line-height:1}
 .ps .pa{font-size:11px;color:var(--mut)}
 .solo .scores{display:none}
 .cpanel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:0}
+.co.fin{background:var(--acc)}
+.cot{font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:12px}
 .cname{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--mut)}
-.big{font-size:min(38vw,190px);font-weight:900;font-stretch:62%;line-height:.85;letter-spacing:-2px;margin:6px 0 10px;transition:color .2s}
+.big{color:var(--acc);font-size:min(38vw,190px);font-weight:900;font-family:"Barlow Condensed",sans-serif;line-height:.85;letter-spacing:-2px;margin:6px 0 10px;transition:color .2s}
 .big.bust{color:var(--red)}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:420px}
-.slot{border:1px solid var(--line);border-radius:12px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.slot b{font-size:26px;font-weight:900;font-stretch:75%;line-height:1}
+.slot{border:1px solid var(--line);border-radius:4px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.slot b{font-size:26px;font-weight:900;font-family:"Barlow Condensed",sans-serif;line-height:1}
 .slot i{font-style:normal;font-size:11px;color:var(--mut)}
-.slot.nx{border-color:var(--mut);border-style:dashed}
+.slot.nx{border-color:#4A64A8;border-style:dashed}
+.slot:has(b:not(:empty)){background:var(--card);border-color:var(--card);border-bottom:3px solid var(--acc)}
 .slot.hit{animation:pop .25s}
 @keyframes pop{from{transform:scale(1.12);background:#2a2927}}
 .tt{font-size:15px;color:var(--mut);margin-top:10px;min-height:20px}
 .tt b{color:var(--txt)}
 .hint{margin-top:8px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
-.co{border:1px solid var(--red);color:var(--txt);border-radius:8px;padding:6px 10px;font-weight:800;font-size:18px;font-stretch:80%}
+.co{background:var(--txt);color:var(--ink);border-radius:0;padding:4px 10px;font-weight:800;font-size:18px;font-family:"Barlow Condensed",sans-serif}
 .msg{font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
 .msg.w{color:var(--warn)}
 .gact{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px}
 .gact .btn{padding:16px 8px;text-transform:uppercase;letter-spacing:1px;font-size:14px}
 .gact .btn.go.pulse{animation:pu2 .9s infinite alternate}
-@keyframes pu2{to{background:#a52a20}}
+@keyframes pu2{to{background:#B89A00}}
 .gstat{display:flex;justify-content:center;gap:18px;font-size:12px;color:var(--mut);margin-top:4px}
 .gstat b{color:var(--txt);font-size:14px}
 
 /* overlay */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + var(--st)) 16px calc(16px + var(--sb));z-index:10}
+.ov{position:fixed;inset:0;background:rgba(5,12,32,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + var(--st)) 16px calc(16px + var(--sb));z-index:10}
 .ov svg{width:min(92vw,62vh);height:auto;touch-action:manipulation}
 .ov .row{margin-top:12px}
-.sum{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(460px,100%);max-height:100%;overflow:auto}
-.sum h3{margin:0 0 4px;font-size:46px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9}
+.sum{background:var(--bg);border-top:4px solid var(--acc);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(460px,100%);max-height:100%;overflow:auto}
+.sum h3{margin:0 0 4px;font-size:46px;font-weight:900;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;line-height:.9}
 .tw{overflow-x:auto;margin:12px 0}.sum table{width:100%;border-collapse:collapse;font-size:13px}
 .sum td,.sum th{padding:7px 3px;white-space:nowrap;border-top:1px solid var(--line);text-align:right}
 .sum th{color:var(--mut);font-weight:600;font-size:10px;letter-spacing:.5px;text-transform:uppercase}
 .sum td:first-child,.sum th:first-child{text-align:left}
-.toast{position:fixed;left:50%;top:calc(14px + var(--st));transform:translateX(-50%);background:var(--txt);color:var(--bg);font-weight:700;border-radius:999px;padding:10px 16px;z-index:20;font-size:14px;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;top:calc(14px + var(--st));transform:translateX(-50%);background:var(--acc);color:var(--ink);font-weight:700;border-radius:999px;padding:10px 16px;z-index:20;font-size:14px;max-width:90vw;text-align:center}
 
+/* bot */
+#ovCap{display:none}
+.botview #ovCap{display:block;text-align:center;margin-bottom:10px;font-size:18px}
+.botview #ovCap .bd{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.botview #ovCap .bd span{border:1px solid var(--line);border-radius:10px;min-width:64px;padding:8px 6px;font-weight:900;font-size:22px;font-family:"Barlow Condensed",sans-serif}
+.botview .row,.botview #ovHint{display:none}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bgrid button{border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:baseline}
+.bgrid button b{font-size:17px;font-weight:900}
+.bgrid button span{font-size:15px;font-weight:800;text-align:right}
+.bgrid button i{grid-column:1/3;font-style:normal;font-size:12px;color:var(--mut)}
+.bgrid button.on{background:var(--acc);color:var(--ink);border-color:var(--acc)}
+.bgrid button.on i{color:var(--ink)}
+.bgrid .none{grid-column:1/3;text-align:center;display:block}
 /* statistiche */
 .tgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .tgrid button{border:1px solid var(--line);border-radius:10px;padding:11px 0;font-weight:800;font-size:16px}
-.tgrid button.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
+.tgrid button.on{background:var(--acc);color:var(--ink);border-color:var(--acc)}
 .tgrid button.bl{grid-column:span 2}
 .ps.dn{opacity:.45}
-.slot.ok{border-color:var(--ok)}
+.slot.ok{border-bottom-color:var(--ok)}
 .sumt table,.sum table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
 .sumt td,.sumt th{padding:7px 3px;border-top:1px solid var(--line);text-align:right}
 .sumt th{color:var(--mut);font-weight:600;font-size:10px;letter-spacing:.5px;text-transform:uppercase}
@@ -138,7 +156,7 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .dgrid div{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center}
 .dgrid b{font-size:15px}.dgrid span{font-size:12px;color:var(--mut)}
 .sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.sgrid>div{background:var(--bg);padding:12px}
+.sgrid>div{background:var(--card);padding:12px}
 .games .g{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
 
 @media (orientation:landscape) and (max-height:600px){
@@ -147,11 +165,18 @@ input[type=range]{width:100%;accent-color:var(--red)}
   .gwrap{display:grid;grid-template-columns:minmax(200px,30%) 1fr;grid-template-rows:1fr auto;gap:10px 16px;margin-top:6px}
   .scores{grid-column:1;grid-row:1;grid-template-columns:1fr;align-content:start;overflow:auto}
   .solo .scores{display:none}
-  .cpanel{grid-column:2;grid-row:1/3;justify-content:center}
+  .cpanel{grid-column:2;grid-row:1/3;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"name name" "big hint" "slots slots" "tt stat";align-content:center;column-gap:22px;row-gap:6px;justify-items:start;text-align:left;overflow:hidden}
+  .cname{grid-area:name;font-size:12px}
+  .big{grid-area:big}
+  .hint{grid-area:hint;justify-content:flex-start;margin:0;align-self:end;padding-bottom:6px}
+  .slots{grid-area:slots;max-width:none}
+  .tt{grid-area:tt;margin:0}
+  .gstat{grid-area:stat;justify-content:flex-start;margin:0;align-self:center}
+  .top{min-height:34px}
   .gact{grid-column:1;grid-row:2;grid-template-columns:1fr 1fr}
   .gact .go{grid-column:1/3}
-  .big{font-size:min(30vh,150px);margin:2px 0 6px}
-  .slot{height:48px}
+  .big{font-size:min(36vh,150px);margin:0;line-height:.82}
+  .slot{height:46px}
   .gact .btn{padding:12px 6px}
   .ov svg{width:min(70vh,60vw)}
 }
@@ -166,7 +191,7 @@ input[type=range]{width:100%;accent-color:var(--red)}
   <h1 class="hero">Cosa<br>alleni<br><em>oggi?</em></h1>
   <div class="small" id="homeSub">Collega la board e scegli il gioco.</div>
   <div class="list">
-    <button class="item" data-go="setup" data-mode="x01"><span class="n" style="color:var(--red)">01</span><span><span class="nm">501</span><span class="ds">301 · 501 · 701, chiusure consigliate</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="setup" data-mode="x01"><span class="n" style="color:var(--acc)">01</span><span><span class="nm">501</span><span class="ds">301 · 501 · 701, chiusure consigliate</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="h100"><span class="n">02</span><span><span class="nm">100 frecce</span><span class="ds">Un numero a scelta: punti e dove finiscono le frecce</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="rtc"><span class="n">03</span><span><span class="nm">Giro del mondo</span><span class="ds">Dall'1 al 20, poi il bull</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="b27"><span class="n">04</span><span><span class="nm">Bob's 27</span><span class="ds">Tutti i doppi, si parte da 27</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
@@ -192,6 +217,7 @@ input[type=range]{width:100%;accent-color:var(--red)}
     <div class="small" style="margin-top:8px">Triplo 3 punti · doppio 2 · singolo 1 (sul bull: 25 = 1, 50 = 2). 100 frecce, massimo 300 punti. Le statistiche segnano anche gli altri numeri colpiti.</div></div>
   <div id="optRtc" class="small" style="margin-top:14px">Colpisci i numeri in ordine dall'1 al 20, poi il bull. Vale qualsiasi parte del numero (singolo, doppio o triplo). Vince chi finisce il giro per primo.</div>
   <div id="optB27" class="small" style="margin-top:14px">Si parte da 27 punti. Tre frecce su ogni doppio, da D1 a D20 e poi il bull. Ogni doppio preso aggiunge il suo valore (D1 = 2, D20 = 40, bull = 50); se in una volée non ne prendi nessuno, il valore si toglie. Sotto zero la partita finisce.</div>
+  <div id="optBot"><div class="sect">Gioca contro il bot · livello e media a 3 freccette</div><div class="bgrid" id="bGrid"></div></div>
   <div class="sect">Giocatori · tocca in ordine di tiro (max 4)</div>
   <div class="chips" id="pChips"></div>
   <form class="addrow" id="addP"><input id="addName" maxlength="14" placeholder="Nuovo giocatore" autocomplete="off"><button class="btn">Aggiungi</button></form>
@@ -267,9 +293,10 @@ input[type=range]{width:100%;accent-color:var(--red)}
 </section>
 
 <div class="ov" id="ovBoard" hidden>
+  <div id="ovCap"></div>
   <svg id="board" viewBox="-205 -205 410 410" aria-label="Bersaglio"></svg>
   <div class="row"><button class="btn" id="mMiss">Fuori (0)</button><button class="btn" id="mUndo">Annulla</button><button class="btn pri" id="mClose">Chiudi</button></div>
-  <div class="small" style="margin-top:8px">Tocca il punto colpito</div>
+  <div class="small" id="ovHint" style="margin-top:8px">Tocca il punto colpito</div>
 </div>
 <div class="ov" id="ovSum" hidden><div class="sum" id="sumBox"></div></div>
 <div class="ov" id="ovQuit" hidden><div class="sum"><h3>Esci?</h3><p class="small">La partita in corso non verrà salvata nelle statistiche.</p><div class="row"><button class="btn" id="qNo">Continua</button><button class="btn pri" id="qYes">Esci</button></div></div></div>
@@ -288,7 +315,7 @@ var ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 var settings=Object.assign({vol:70,fatBull:false,voice:false,vibe:true},load("gb_settings",{}));
-var setup=Object.assign({mode:"x01",h100t:20,start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
+var setup=Object.assign({bot:0,mode:"x01",h100t:20,start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
 var players=load("gb_players",["Io"]);
 var games=load("gb_games",[]);
 function saveSettings(){store("gb_settings",settings);}
@@ -503,8 +530,9 @@ function renderHome(){
 /* ================= setup ================= */
 function renderSetup(){
   var m=setup.mode||"x01";
-  $("setupTitle").innerHTML="Nuova partita<br><span style='color:var(--red)'>"+esc(MODE_NAMES[m])+"</span>";
-  $("optX01").hidden=m!=="x01";$("optH100").hidden=m!=="h100";$("optRtc").hidden=m!=="rtc";$("optB27").hidden=m!=="b27";
+  $("setupTitle").innerHTML="Nuova partita<br><span style='color:var(--acc)'>"+esc(MODE_NAMES[m])+"</span>";
+  $("optX01").hidden=m!=="x01";$("optBot").hidden=m!=="x01";
+  $("bGrid").innerHTML='<button class="none'+(setup.bot?"":" on")+'" data-bot="0">Nessun bot</button>'+BOT_LV.map(function(l,i){return '<button data-bot="'+(i+1)+'" class="'+(setup.bot===i+1?"on":"")+'"><b>Liv. '+(i+1)+'</b><span>media '+l[0]+'</span><i>'+l[2]+'</i></button>';}).join("");$("optH100").hidden=m!=="h100";$("optRtc").hidden=m!=="rtc";$("optB27").hidden=m!=="b27";
   $("tGrid").innerHTML=RTC.map(function(n){return '<button data-t="'+n+'" class="'+(n===setup.h100t?"on":"")+(n===25?" bl":"")+'">'+tName(n)+'</button>';}).join("");
   document.querySelectorAll("#vSetup .seg").forEach(function(sg){var o=sg.dataset.opt;sg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",String(setup[o])===b.dataset.v);});});
   setup.players=setup.players.filter(function(p){return players.indexOf(p)>=0;});
@@ -513,6 +541,8 @@ function renderSetup(){
   $("bStart").disabled=!setup.players.length;
 }
 $("vSetup").addEventListener("click",function(e){
+  var bb=e.target.closest("[data-bot]");
+  if(bb){setup.bot=+bb.dataset.bot;store("gb_setup",setup);renderSetup();return;}
   var tb=e.target.closest("[data-t]");
   if(tb){setup.h100t=+tb.dataset.t;store("gb_setup",setup);renderSetup();return;}
   var sb=e.target.closest(".seg button");
@@ -529,7 +559,10 @@ $("addP").addEventListener("submit",function(e){
   if(players.indexOf(n)<0)players.push(n);if(setup.players.indexOf(n)<0&&setup.players.length<4)setup.players.push(n);
   $("addName").value="";store("gb_players",players);store("gb_setup",setup);renderSetup();
 });
-$("bStart").onclick=function(){ac();newGame(setup.players.slice());};
+$("bStart").onclick=function(){
+  var n=setup.players.slice();
+  if((setup.mode||"x01")==="x01"&&setup.bot){if(n.length>=4){toast("Con il bot al massimo 3 giocatori");return;}n.push("BOT "+setup.bot);}
+  ac();newGame(n);};
 
 /* ================= partite ================= */
 var MODE_NAMES={x01:"501",h100:"100 frecce",rtc:"Giro del mondo",b27:"Bob's 27"};
@@ -543,7 +576,7 @@ function newGame(names){
   buildSegs();
   var m=setup.mode||"x01";
   game={id:Date.now(),type:m,start:setup.start,inRule:setup.inRule,outRule:setup.outRule,fatBull:settings.fatBull,target:setup.h100t,
-    players:names.map(function(n){var p={name:n,turns:[],done:false};
+    players:names.map(function(n){var p={name:n,turns:[],done:false,bot:botLevel(n)};
       if(m==="x01"){p.score=setup.start;p.opened=setup.inRule==="open";}
       if(m==="h100"){p.score=0;p.n=0;p.cnt={};}
       if(m==="rtc"){p.idx=0;p.n=0;p.hits=0;p.per=[];}
@@ -562,10 +595,12 @@ function finOK(zi){if(game.outRule==="single")return true;if(game.outRule==="dou
 function onButton(){
   if(cur!=="vGame"){return;}
   if(!$("ovSum").hidden){$("sumAgain")&&$("sumAgain").click();return;}
+  if(game&&!game.over&&P().bot&&!game.wait)return;
   nextPlayer();
 }
-function throwDart(z){
+function throwDart(z,fromBot){
   if(!game||game.over)return;
+  if(P().bot&&!fromBot){toast("Sta tirando "+P().name);return;}
   if(game.wait){
     if(game.type==="x01"){toast("Togli le freccette e premi il pulsante della board");play("out");return;}
     nextPlayer(); // negli allenamenti la freccia successiva fa partire da sola la nuova volée
@@ -573,6 +608,7 @@ function throwDart(z){
   }
   snap();
   if(game.type==="x01")dartX01(z);else dartOther(z);
+  if(fromBot){var td=T().darts;td[td.length-1].xy=botXY;}
   renderGame(true);
 }
 function dartX01(z){
@@ -738,11 +774,11 @@ function renderGame(anim){
   else if(ty==="x01"){
     if(!p.opened)h='<span class="msg mut">Serve un doppio per entrare</span>';
     else{var left=3-t.darts.length,co=p.score<=180?checkout(p.score,left,g.outRule):null;
-      if(co)h=co.map(function(c){return '<span class="co">'+c+'</span>';}).join("");}
+      if(co)h='<span class="small cot">Chiudi con</span>'+co.map(function(c,i){return '<span class="co'+(i===co.length-1?' fin':'')+'">'+c+'</span>';}).join("");}
   }
-  else if(ty==="h100")h='<span class="small">Bersaglio</span><span class="co">'+tName(g.target)+'</span>';
-  else if(ty==="rtc")h='<span class="small">Bersaglio</span><span class="co">'+tName(RTC[p.idx])+'</span>';
-  else if(ty==="b27"){var nn=B27[p.idx],vv=nn===25?50:nn*2;h='<span class="small">Bersaglio</span><span class="co">'+dName(nn)+'</span><span class="small">± '+vv+'</span>';}
+  else if(ty==="h100")h='<span class="small cot">Bersaglio</span><span class="co fin">'+tName(g.target)+'</span>';
+  else if(ty==="rtc")h='<span class="small cot">Bersaglio</span><span class="co fin">'+tName(RTC[p.idx])+'</span>';
+  else if(ty==="b27"){var nn=B27[p.idx],vv=nn===25?50:nn*2;h='<span class="small cot">Bersaglio</span><span class="co fin">'+dName(nn)+'</span><span class="small">± '+vv+'</span>';}
   $("gHint").innerHTML=h;
   var st="";
   if(ty==="x01"){var s=pStats(p);st='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Prime 9 <b>'+fmt(s.f9)+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';}
@@ -752,13 +788,66 @@ function renderGame(anim){
   $("gStat").innerHTML=st;
   $("gNext").textContent=g.over?"Riepilogo":(many?"Cambio":"Prossimo");
   $("gNext").classList.toggle("pulse",g.wait&&!g.over);
+  botCheck();
 }
 $("gUndo").onclick=undo;$("mUndo").onclick=undo;
 $("gNext").onclick=function(){if(game&&game.over)showSummary();else nextPlayer();};
 $("gQuit").onclick=function(){if(!game||game.over||!undoStack.length){quit();return;}$("ovQuit").hidden=false;};
 $("qNo").onclick=function(){$("ovQuit").hidden=true;};
 $("qYes").onclick=function(){$("ovQuit").hidden=true;quit();};
-function quit(){game=null;$("ovSum").hidden=true;show("vHome");}
+function quit(){clearTimeout(botT);botBoard(false);game=null;$("ovSum").hidden=true;show("vHome");}
+
+/* ================= bot ================= */
+// livelli: [media a 3 freccette, dispersione in mm] (calibrata simulando 60.000 tiri al T20)
+var BOT_LV=[[25,87.3,"Principiante"],[33,51.1,"Alle prime armi"],[40,31.7,"Giocatore da bar"],[48,22.3,"Amatore"],[55,18.5,"Buon giocatore di squadra"],
+  [62,15.9,"Giocatore di squadra esperto"],[70,13.6,"Forte, chiude spesso"],[78,11.9,"Da torneo"],[85,10.6,"Molto forte"],[100,8.3,"Professionista"]];
+var BR={db:6.35,bull:15.9,tIn:99,tOut:107,dIn:162,dOut:170};
+function botLevel(name){var m=/^BOT (\d+)$/.exec(name||"");return m?+m[1]:0;}
+function gauss(){var u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function aimXY(lab){
+  if(lab==="BULL")return [0,0];
+  if(lab==="25")return [0,-11];
+  var t=lab[0],n,r;
+  if(t==="T"){n=+lab.slice(1);r=103;}else if(t==="D"){n=+lab.slice(1);r=166;}else{n=+lab;r=134;}
+  var a=(ORDER.indexOf(n)*18-90)*Math.PI/180;return [r*Math.cos(a),r*Math.sin(a)];
+}
+function zoneAt(x,y){
+  var r=Math.hypot(x,y);if(r>BR.dOut)return "MISS";if(r<=BR.db)return "DBULL";if(r<=BR.bull)return "BULL";
+  var ang=(Math.atan2(x,-y)*180/Math.PI+360)%360,n=ORDER[Math.floor(((ang+9)%360)/18)];
+  if(r<BR.tIn)return "S"+n+"i";if(r<=BR.tOut)return "T"+n;if(r<BR.dIn)return "S"+n+"o";return "D"+n;
+}
+function botAim(p){
+  var t=T(),left=3-t.darts.length,rule=game.outRule,rem=p.score;
+  if(!p.opened)return "D20";
+  if(rem<=170){var co=checkout(rem,left,rule);if(co)return co[0];}
+  if(rem>60||rule==="single")return "T20";
+  var pref=[32,40,16,24,36,8,20,12,4,2];
+  for(var i=0;i<pref.length;i++){var s=rem-pref[i];if(s>=1&&s<=20)return String(s);}
+  return rem>20?"20":"1";
+}
+var botT=null;
+function botCheck(){
+  clearTimeout(botT);botT=null;
+  var on=!!(game&&cur==="vGame"&&!game.over&&P().bot);
+  botBoard(on);
+  if(on)botT=setTimeout(botAct,game.wait?1800:1000);
+}
+function botAct(){
+  botT=null;if(!game||game.over)return;var p=P();if(!p.bot)return;
+  if(game.wait){nextPlayer();return;}
+  var a=aimXY(botAim(p)),s=BOT_LV[p.bot-1][1],x=a[0]+gauss()*s,y=a[1]+gauss()*s;
+  botXY=[x,y];throwDart(zoneAt(x,y),true);
+}
+var botXY=null;
+function botBoard(on){
+  var ov=$("ovBoard");
+  if(!on){if(ov.classList.contains("botview")){ov.classList.remove("botview");ov.hidden=true;$("marks").innerHTML="";}return;}
+  ov.hidden=false;ov.classList.add("botview");
+  var p=P(),t=T();
+  $("ovCap").innerHTML='<b>'+esc(p.name)+'</b> · '+(t.bust?'<span style="color:var(--red)">SBALLATO</span>':'resta <b>'+p.score+'</b>')+
+    '<div class="bd">'+[0,1,2].map(function(i){var d=t.darts[i];return '<span>'+(d?(d.z==="MISS"?"—":zone(d.z).lab):"·")+'</span>';}).join("")+'</div>';
+  $("marks").innerHTML=t.darts.map(function(d,i){return d.xy?'<circle cx="'+d.xy[0].toFixed(1)+'" cy="'+d.xy[1].toFixed(1)+'" r="6" fill="#FFD23F" stroke="#0B0B0B" stroke-width="2"/><text x="'+(d.xy[0]+9).toFixed(1)+'" y="'+(d.xy[1]-7).toFixed(1)+'" font-size="13" font-weight="800" fill="#FFD23F">'+(i+1)+'</text>':'';}).join("");
+}
 
 /* ---- inserimento manuale ---- */
 $("gManual").onclick=function(){$("ovBoard").hidden=false;};
@@ -777,7 +866,9 @@ $("mMiss").onclick=function(){throwDart("MISS");};
   });
   svg.appendChild(el("circle",{cx:0,cy:0,r:R.bull,fill:"#2F8A4A",stroke:"#0B0B0B"}));
   svg.appendChild(el("circle",{cx:0,cy:0,r:R.db,fill:"#E63B2E",stroke:"#0B0B0B"}));
+  svg.appendChild(el("g",{id:"marks"}));
   svg.addEventListener("click",function(e){
+    if(game&&!game.over&&P().bot)return;
     var b=svg.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*410-205,y=(e.clientY-b.top)/b.height*410-205;
     var r=Math.hypot(x,y),ang=(Math.atan2(x,-y)*180/Math.PI+360)%360,n=ORDER[Math.floor(((ang+9)%360)/18)],z;
     if(r<=R.db)z="DBULL";else if(r<=R.bull)z="BULL";else if(r<R.tIn)z="S"+n+"i";else if(r<=R.tOut)z="T"+n;else if(r<R.dIn)z="S"+n+"o";else if(r<=R.dOut)z="D"+n;else z="MISS";
@@ -865,7 +956,7 @@ var statSel=null,statMode="x01",statTgt=null;
 function cellsHtml(c){return c.map(function(x){return '<div><div class="kl">'+x[0]+'</div><div class="kv">'+x[1]+'</div></div>';}).join("");}
 function dd(g){return new Date(g.date).toLocaleDateString("it-IT",{day:"2-digit",month:"short"});}
 function renderStats(){
-  var names=players.slice();games.forEach(function(g){g.players.forEach(function(p){if(names.indexOf(p.name)<0)names.push(p.name);});});
+  var names=players.slice();games.forEach(function(g){g.players.forEach(function(p){if(names.indexOf(p.name)<0&&!botLevel(p.name))names.push(p.name);});});
   if(!statSel||names.indexOf(statSel)<0)statSel=names[0];
   $("sModes").innerHTML=["x01","h100","rtc","b27"].map(function(m){return '<button class="chip'+(m===statMode?" on":"")+'" data-sm="'+m+'">'+MODE_NAMES[m]+'</button>';}).join("");
   $("sChips").innerHTML=names.map(function(n){return '<button class="chip'+(n===statSel?" on":"")+'" data-sp="'+esc(n)+'">'+esc(n)+'</button>';}).join("");
@@ -877,6 +968,9 @@ function renderStats(){
     var s=statsFor(statSel);
     cells=[["Media 3 frecce",fmt(s.avg)],["Prime 9",fmt(s.f9)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
       ["% chiusura (double out)",s.coPct==null?"—":fmt(s.coPct,0)+"%"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
+    var vb={};mine.forEach(function(gp){gp[0].players.forEach(function(q){var l=botLevel(q.name);if(l){vb[l]=vb[l]||[0,0];vb[l][1]++;if(gp[1].won)vb[l][0]++;}});});
+    var lv=Object.keys(vb).sort(function(a,b){return a-b;});
+    if(lv.length)extra='<div class="sect">Contro il bot · vinte su giocate</div><div class="dgrid">'+lv.map(function(l){return '<div><b>Liv. '+l+'</b><span>'+vb[l][0]+' su '+vb[l][1]+'</span></div>';}).join("")+'</div>';
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];var vs=g.players.filter(function(x){return x.name!==statSel;}).map(function(x){return x.name;}).join(", ");
       return '<div class="g"><span>'+dd(g)+' · '+g.start+(vs?' vs '+esc(vs):' solo')+(p.won?' · <b style="color:var(--ok)">vinta</b>':'')+'</span><span>media <b>'+fmt(p.darts?p.pts/p.darts*3:0)+'</b> · '+p.darts+' fr.</span></div>';}).join("");
   }
