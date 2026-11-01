@@ -281,6 +281,7 @@ input[type=range]{width:100%;accent-color:var(--acc)}
   <div class="row"><span class="small" style="width:70px">Volume</span><input type="range" id="setVol" min="0" max="100"><span class="mono" id="setVolV" style="width:44px;text-align:right"></span></div>
   <div class="toggle"><span>Voce che annuncia il punteggio</span><button class="sw" data-sw="voice"></button></div>
   <div class="toggle"><span>Vibrazione a ogni freccia</span><button class="sw" data-sw="vibe"></button></div>
+  <div class="toggle"><span>Schermo intero durante la partita</span><button class="sw" data-sw="full"></button></div>
   <button class="btn" id="setDemo" style="margin-top:6px">▶ Ascolta i suoni</button>
   <div class="sect">Se la board non si collega</div>
   <ol class="small" style="padding-left:18px;margin:0">
@@ -314,7 +315,7 @@ var ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 /* ================= archivio ================= */
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-var settings=Object.assign({vol:70,fatBull:false,voice:false,vibe:true},load("gb_settings",{}));
+var settings=Object.assign({vol:70,fatBull:false,voice:false,vibe:true,full:true},load("gb_settings",{}));
 var setup=Object.assign({bot:0,mode:"x01",h100t:20,start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
 var players=load("gb_players",["Io"]);
 var games=load("gb_games",[]);
@@ -562,7 +563,11 @@ $("addP").addEventListener("submit",function(e){
 $("bStart").onclick=function(){
   var n=setup.players.slice();
   if((setup.mode||"x01")==="x01"&&setup.bot){if(n.length>=4){toast("Con il bot al massimo 3 giocatori");return;}n.push("BOT "+setup.bot);}
-  ac();newGame(n);};
+  ac();goFull();newGame(n);};
+function goFull(){ // nasconde la barra di Chrome durante la partita (serve un tocco, quindi parte da "Inizia")
+  try{if(!settings.full||document.fullscreenElement||matchMedia("(display-mode: standalone)").matches)return;
+    var el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen).call(el,{navigationUI:"hide"}).catch(function(){});}catch(e){}
+}
 
 /* ================= partite ================= */
 var MODE_NAMES={x01:"501",h100:"100 frecce",rtc:"Giro del mondo",b27:"Bob's 27"};
@@ -919,7 +924,7 @@ function showSummary(){
   $("ovSum").hidden=false;
   $("sumUndo").onclick=undo;$("sumMenu").onclick=quit;
   $("sumAgain").onclick=function(){var n=game.players.map(function(q){return q.name;});if(n.length>1)n.push(n.shift());$("ovSum").hidden=true;
-    setup.mode=game.type;setup.start=game.start;setup.inRule=game.inRule;setup.outRule=game.outRule;if(game.target)setup.h100t=game.target;newGame(n);};
+    goFull();setup.mode=game.type;setup.start=game.start;setup.inRule=game.inRule;setup.outRule=game.outRule;if(game.target)setup.h100t=game.target;newGame(n);};
 }
 
 /* ================= statistiche ================= */
