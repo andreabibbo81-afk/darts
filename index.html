@@ -155,6 +155,24 @@ nav.tabs svg{display:block;margin:0 auto 4px}
 .chip .ord{vertical-align:middle;margin-right:6px}
 .chip .x{margin-left:6px}
 .back{display:inline-block}
+/* sfida online */
+#vids{position:relative;background:#000;border-radius:6px;overflow:hidden;height:24vh;flex:none;transition:height .3s}
+#vRemote{width:100%;height:100%;object-fit:cover;display:block;background:#05102a}
+#vLocal{position:absolute;right:6px;top:6px;width:28%;max-width:150px;border:2px solid var(--acc);border-radius:4px;object-fit:cover;background:#05102a}
+#vidMsg{position:absolute;left:8px;top:8px;right:36%;font-size:12px;font-weight:700;background:rgba(5,16,42,.7);padding:4px 8px;border-radius:4px}
+#vidMsg:empty{display:none}
+.vbtn{position:absolute;left:6px;bottom:6px}
+.vbtn .btn{padding:6px 10px;font-size:11px;background:rgba(5,16,42,.75);margin-right:6px}
+.gwrap.their #vids{height:44vh}
+@media (orientation:landscape) and (max-height:860px){
+  .gwrap.online{grid-template-columns:minmax(230px,34%) 1fr;grid-template-rows:auto 1fr auto}
+  .gwrap.online #vids{grid-column:1;grid-row:1;height:auto;min-height:130px}
+  .gwrap.online #vRemote{height:auto;aspect-ratio:4/3}
+  .gwrap.online .scores{grid-row:2}
+  .gwrap.online .gact{grid-row:3}
+  .gwrap.online .cpanel{grid-row:1/4}
+  .gwrap.online.their{grid-template-columns:minmax(300px,58%) 1fr}
+}
 /* bot */
 #ovCap{display:none}
 .botview #ovCap{display:block;text-align:center;margin-bottom:10px;font-size:18px}
@@ -224,6 +242,7 @@ nav.tabs svg{display:block;margin:0 auto 4px}
     <button class="item" data-go="setup" data-mode="h100"><span class="n">02</span><span><span class="nm">100 frecce</span><span class="ds">Un numero a scelta: punti e dove finiscono le frecce</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="rtc"><span class="n">03</span><span><span class="nm">Giro del mondo</span><span class="ds">Dall'1 al 20, poi il bull</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="b27"><span class="n">04</span><span><span class="nm">Bob's 27</span><span class="ds">Tutti i doppi, si parte da 27</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="online"><span class="n" style="color:var(--acc)">05</span><span><span class="nm">Sfida online</span><span class="ds">501 contro un compagno a casa sua, con la telecamera</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
   </div>
   <div class="kpis" id="homeKpi"></div>
   <div class="grow"></div>
@@ -253,10 +272,37 @@ nav.tabs svg{display:block;margin:0 auto 4px}
   <div class="stick"><button class="btn pri wide" id="bStart">Inizia</button></div>
 </section>
 
+<!-- SFIDA ONLINE -->
+<section class="view" id="vOnline" hidden>
+  <div class="top"><button class="back" data-go="home">← Indietro</button><button class="pill" data-conn><span class="dot"></span><span data-conntxt>Granboard</span></button></div>
+  <h2 class="t">Sfida<br><span style="color:var(--acc)">online</span></h2>
+  <div class="sect">Chi sei</div>
+  <div class="chips" id="oChips"></div>
+  <form class="addrow" id="oAdd"><input id="oName" maxlength="14" placeholder="Scrivi il tuo nome" autocomplete="off"><button class="btn">Aggiungi</button></form>
+  <div id="oStart">
+    <div class="sect">Partita (la sceglie chi crea la sfida)</div>
+    <div class="seg" data-oopt="start"><button data-v="301">301</button><button data-v="501">501</button><button data-v="701">701</button></div>
+    <div class="seg" data-oopt="outRule" style="margin-top:8px"><button data-v="single">Chiusura libera</button><button data-v="double">Doppio</button><button data-v="master">Master</button></div>
+    <button class="btn pri wide" id="oCreate" style="margin-top:16px">Crea sfida</button>
+    <div class="sect">Oppure entra con il codice del tuo avversario</div>
+    <form class="addrow" id="oJoin"><input id="oIn" inputmode="numeric" maxlength="7" placeholder="Codice di 6 cifre" autocomplete="off"><button class="btn pri">Entra</button></form>
+  </div>
+  <div id="oWait" class="card" hidden style="margin-top:18px;text-align:center">
+    <div class="kl">Codice della sfida</div>
+    <div id="oCode" style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:800;color:var(--acc);letter-spacing:4px;line-height:1.1;user-select:text">——</div>
+    <div class="small">Mandalo al tuo avversario: lo scrive in Sfida online → Entra. La partita parte da sola appena entra.</div>
+    <button class="btn" id="oCancel" style="margin-top:12px">Annulla</button>
+  </div>
+  <div class="small" style="margin-top:18px">Ognuno gioca sulla propria Granboard. Quando tira l'avversario vedi la sua telecamera in grande. Serve internet; con il Wi-Fi il video va meglio. L'app chiede il permesso per telecamera e microfono.</div>
+  <div class="grow"></div>
+</section>
+
 <!-- PARTITA -->
 <section class="view" id="vGame" hidden>
   <div class="top"><button class="back" id="gQuit">✕ Esci</button><span class="kicker mut" id="gTitle">501</span><button class="pill" data-conn><span class="dot"></span><span data-conntxt>Granboard</span></button></div>
   <div class="gwrap" id="gWrap">
+    <div id="vids" hidden><video id="vRemote" playsinline autoplay></video><video id="vLocal" playsinline autoplay muted></video><div id="vidMsg"></div>
+      <div class="vbtn"><button class="btn" id="vCam">Cambia camera</button><button class="btn" id="vMic">Microfono sì</button></div></div>
     <div class="scores" id="gScores"></div>
     <div class="cpanel">
       <div class="cname" id="gName"></div>
@@ -575,14 +621,14 @@ document.querySelectorAll("nav.tabs").forEach(function(nv){
   nv.innerHTML=TABS.map(function(t){return '<button data-tab="'+t[0]+'"><svg viewBox="0 0 24 24">'+t[2]+'</svg>'+t[1]+'</button>';}).join("");
 });
 function show(id){
-  ["vHome","vSetup","vGame","vStats","vSet"].forEach(function(v){$(v).hidden=v!==id;});cur=id;
+  ["vHome","vSetup","vOnline","vGame","vStats","vSet"].forEach(function(v){$(v).hidden=v!==id;});cur=id;
   document.querySelectorAll("[data-tab]").forEach(function(b){b.classList.toggle("on",b.dataset.tab===id);});
-  if(id==="vHome")renderHome();if(id==="vSetup")renderSetup();if(id==="vStats")renderStats();if(id==="vSet")renderSet();
+  if(id==="vHome")renderHome();if(id==="vSetup")renderSetup();if(id==="vStats")renderStats();if(id==="vSet")renderSet();if(id==="vOnline")renderOnline();
   $(id).scrollTop=0;
 }
 document.addEventListener("click",function(e){
   var t=e.target.closest("[data-tab]");if(t){show(t.dataset.tab);return;}
-  var g=e.target.closest("[data-go]");if(g){if(g.dataset.mode){setup.mode=g.dataset.mode;store("gb_setup",setup);}show(g.dataset.go==="home"?"vHome":"vSetup");return;}
+  var g=e.target.closest("[data-go]");if(g){if(g.dataset.go==="home"&&online&&online.waiting)onlineStop();if(g.dataset.mode){setup.mode=g.dataset.mode;store("gb_setup",setup);}show(g.dataset.go==="home"?"vHome":g.dataset.go==="online"?"vOnline":"vSetup");return;}
   var c=e.target.closest("[data-conn]");if(c){if(bt.state==="on")show("vSet");else connect();}
 });
 
@@ -669,6 +715,7 @@ function onButton(){
 }
 function throwDart(z,fromBot){
   if(!game||game.over)return;
+  if(online&&!myTurn()){toast("Tocca a "+P().name);return;}
   if(P().bot&&!fromBot){toast("Sta tirando "+P().name);return;}
   if(game.wait){
     if(game.type==="x01"){toast("Togli le freccette e premi il pulsante della board");play("out");return;}
@@ -761,6 +808,7 @@ function endGame(){
 }
 function nextPlayer(){
   if(!game||game.over)return;
+  if(online&&!myTurn())return;
   var t=T(),p=P(),n=game.players.length;
   if(!game.wait&&!t.darts.length&&n===1){return;}
   snap();
@@ -780,6 +828,7 @@ function nextPlayer(){
   play("change");if(n>1)say("Tocca a "+np.name);renderGame();
 }
 function undo(){
+  if(online&&!myTurn()){toast("Puoi annullare solo le tue freccette");return;}
   if(!undoStack.length){toast("Niente da annullare");return;}
   var wasSaved=game.savedId;
   game=JSON.parse(undoStack.pop());
@@ -858,14 +907,17 @@ function renderGame(anim){
   $("gStat").innerHTML=st;
   $("gNext").textContent=g.over?"Riepilogo":(many?"Cambio":"Prossimo");
   $("gNext").classList.toggle("pulse",g.wait&&!g.over);
+  if(online&&!g.over)$("gName").textContent=myTurn()?"Tocca a te":"Tira "+p.name;
   botCheck();
+  if(online)onlinePush();
+  renderVid();
 }
 $("gUndo").onclick=undo;$("mUndo").onclick=undo;
 $("gNext").onclick=function(){if(game&&game.over)showSummary();else nextPlayer();};
 $("gQuit").onclick=function(){if(!game||game.over||!undoStack.length){quit();return;}$("ovQuit").hidden=false;};
 $("qNo").onclick=function(){$("ovQuit").hidden=true;};
 $("qYes").onclick=function(){$("ovQuit").hidden=true;quit();};
-function quit(){clearTimeout(botT);botBoard(false);game=null;$("ovSum").hidden=true;show("vHome");}
+function quit(){clearTimeout(botT);botBoard(false);onlineStop();game=null;$("ovSum").hidden=true;show("vHome");}
 
 /* ================= bot ================= */
 // livelli: [media a 3 freccette, dispersione in mm] (calibrata simulando 60.000 tiri al T20)
@@ -918,6 +970,165 @@ function botBoard(on){
     '<div class="bd">'+[0,1,2].map(function(i){var d=t.darts[i];return '<span>'+(d?(d.z==="MISS"?"—":zone(d.z).lab):"·")+'</span>';}).join("")+'</div>';
   $("marks").innerHTML=t.darts.map(function(d,i){return d.xy?'<circle cx="'+d.xy[0].toFixed(1)+'" cy="'+d.xy[1].toFixed(1)+'" r="6" fill="#FFD23F" stroke="#0B0B0B" stroke-width="2"/><text x="'+(d.xy[0]+9).toFixed(1)+'" y="'+(d.xy[1]-7).toFixed(1)+'" font-size="13" font-weight="800" fill="#FFD23F">'+(i+1)+'</text>':'';}).join("");
 }
+
+/* ================= sfida online (punteggi via Firebase, video diretto tra i telefoni) ================= */
+function fbPath(p){return FB.base+p+"?key="+FB.key;}
+async function fbGet(p){var r=await fetch(fbPath(p),{cache:"no-store"});if(r.status===404)return null;if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();try{return JSON.parse(j.fields.dati.stringValue);}catch(e){return null;}}
+async function fbSet(p,o){var r=await fetch(fbPath(p),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{dati:{stringValue:JSON.stringify(o)}}})});if(!r.ok)throw new Error("HTTP "+r.status);}
+var online=null; // {room, role:"host"|"guest", me, seq, last, timer, saved:{}, hold}
+var rtc={pc:null,local:null,facing:"user",mic:true,state:""};
+function roomPath(d){return "/sfide/"+online.room+"/x/"+d;}
+
+function renderOnline(){
+  if(!setup.me||players.indexOf(setup.me)<0)setup.me=players[0];
+  $("oChips").innerHTML=players.map(function(p){return '<button class="chip'+(p===setup.me?" on":"")+'" data-me="'+esc(p)+'">'+esc(p)+'</button>';}).join("");
+  document.querySelectorAll("#vOnline .seg").forEach(function(sg){var o=sg.dataset.oopt;sg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",String(setup[o])===b.dataset.v);});});
+  var waiting=!!(online&&online.waiting);
+  $("oStart").hidden=waiting;$("oWait").hidden=!waiting;
+  if(waiting)$("oCode").textContent=online.room.replace(/(\d{3})(\d{3})/,"$1 $2");
+}
+$("vOnline").addEventListener("click",function(e){
+  var m=e.target.closest("[data-me]");if(m){setup.me=m.dataset.me;store("gb_setup",setup);renderOnline();return;}
+  var sb=e.target.closest(".seg button");if(sb){var o=sb.parentNode.dataset.oopt,v=sb.dataset.v;setup[o]=o==="start"?+v:v;store("gb_setup",setup);renderOnline();}
+});
+$("oCreate").onclick=async function(){
+  ac();
+  var room="";for(var i=0;i<6;i++){var r=new Uint32Array(1);crypto.getRandomValues(r);room+=r[0]%10;}
+  online={room:room,role:"host",me:setup.me,seq:0,last:"",saved:{},waiting:true,hold:false};
+  try{await fbSet(roomPath("info"),{host:setup.me,guest:"",start:setup.start,inRule:"open",outRule:setup.outRule,t:Date.now()});}
+  catch(e){toast("Serve internet per creare la sfida");online=null;return;}
+  renderOnline();startCam();
+  online.timer=setInterval(hostWaitTick,1200);
+};
+$("oAdd").onsubmit=function(e){e.preventDefault();var n=$("oName").value.trim();if(!n)return;if(players.indexOf(n)<0)players.push(n);setup.me=n;$("oName").value="";store("gb_players",players);store("gb_setup",setup);renderOnline();};
+$("oCancel").onclick=function(){onlineStop();renderOnline();};
+async function hostWaitTick(){
+  if(!online||!online.waiting)return;
+  try{var info=await fbGet(roomPath("info"));}catch(e){return;}
+  if(info&&info.guest){
+    clearInterval(online.timer);online.waiting=false;online.guest=info.guest;
+    play("change");toast(info.guest+" è entrato nella sfida");
+    setup.start=info.start;setup.outRule=info.outRule;setup.inRule="open";setup.mode="x01";
+    onlineNewGame([{name:online.me,dev:"host"},{name:info.guest,dev:"guest"}]);
+    startCall();
+    online.timer=setInterval(onlineTick,900);
+  }
+}
+$("oJoin").onsubmit=async function(e){
+  e.preventDefault();ac();
+  var room=$("oIn").value.replace(/\D/g,"");
+  if(room.length!==6){toast("Il codice ha 6 cifre");return;}
+  online={room:room,role:"guest",me:setup.me,seq:0,last:"",saved:{},waiting:false,hold:false};
+  try{var info=await fbGet(roomPath("info"));}catch(err){toast("Serve internet per entrare");online=null;return;}
+  if(!info){toast("Nessuna sfida con questo codice");online=null;return;}
+  if(info.guest&&info.guest!==setup.me){toast("Questa sfida è già al completo");online=null;return;}
+  var me=setup.me===info.host?setup.me+" 2":setup.me;online.me=me;
+  info.guest=me;await fbSet(roomPath("info"),info);
+  $("oIn").value="";toast("Entrato: aspetto l'avversario…");
+  startCam();
+  online.timer=setInterval(onlineTick,900);
+};
+function onlineNewGame(order){
+  online.hold=true;
+  newGame(order.map(function(o){return o.name;}));
+  game.players.forEach(function(p,i){p.dev=order[i].dev;});
+  online.hold=false;undoStack=[];renderGame();
+}
+function onlinePush(){
+  if(!online||online.hold||online.waiting||!game)return;
+  var js=JSON.stringify(game);if(js===online.last)return;
+  online.last=js;online.seq++;
+  fbSet(roomPath("stato"),{seq:online.seq,by:online.role,game:game}).catch(function(){toast("Connessione lenta: riprovo…");online.last="";});
+}
+var onlineBusy=false;
+async function onlineTick(){
+  if(!online||onlineBusy)return;onlineBusy=true;
+  try{
+    var st=await fbGet(roomPath("stato"));
+    if(st&&st.seq>online.seq&&st.by!==online.role){
+      var old=game;online.seq=st.seq;game=st.game;online.last=JSON.stringify(game);undoStack=[];
+      if(cur!=="vGame")show("vGame");
+      if(!old||old.id!==game.id){$("ovSum").hidden=true;play("start");}
+      else remoteSounds(old,game);
+      renderGame(true);
+      if(game.over&&!online.saved[game.id]){saveGame();setTimeout(showSummary,1500);}
+    }
+    if(online.role==="guest"&&!rtc.pc){var of=await fbGet(roomPath("offer"));if(of)answerCall(of);}
+    if(online.role==="host"&&rtc.pc&&!rtc.pc.currentRemoteDescription&&rtc.offered){var an=await fbGet(roomPath("answer"));if(an&&an.t===rtc.offered)await rtc.pc.setRemoteDescription(an.sdp);}
+  }catch(e){}
+  onlineBusy=false;
+}
+function flatDarts(g){var r=[];g.players.forEach(function(p){p.turns.forEach(function(t){t.darts.forEach(function(d){r.push(d);});});});return r;}
+function remoteSounds(o,n){
+  var a=flatDarts(o).length,b=flatDarts(n),np=n.players[n.cur],t=np.turns[np.turns.length-1];
+  b.slice(a).forEach(function(d,i){var zi=zone(d.z);if(zi.trp)playTriple(zi.seg,i*0.3);else play(hitSound(zi),i*0.3);});
+  if(n.over)play("checkout",0.3);
+  else if(t&&t.bust)play("bust",0.2);
+  else if(o.cur!==n.cur)play("change");
+}
+function myTurn(){return !online||!game||game.over||P().dev===online.role;}
+function onlineStop(){
+  if(!online)return;
+  clearInterval(online.timer);online=null;
+  try{if(rtc.pc)rtc.pc.close();}catch(e){}rtc.pc=null;rtc.offered=0;
+  if(rtc.local){rtc.local.getTracks().forEach(function(t){t.stop();});rtc.local=null;}
+  $("vRemote").srcObject=null;$("vLocal").srcObject=null;$("vids").hidden=true;$("gWrap").classList.remove("online","their");
+}
+
+/* ---- video ---- */
+async function startCam(){
+  if(rtc.local)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){rtc.state="Questo dispositivo non permette il video: si gioca solo con i punteggi";return;}
+  try{
+    rtc.local=await navigator.mediaDevices.getUserMedia({video:{facingMode:rtc.facing,width:{ideal:640},height:{ideal:480}},audio:{echoCancellation:true,noiseSuppression:true}});
+    $("vLocal").srcObject=rtc.local;$("vLocal").muted=true;try{$("vLocal").play();}catch(e){}
+  }catch(e){rtc.state="Telecamera non autorizzata: si gioca senza video";toast(rtc.state,3500);}
+}
+function newPC(){
+  if(!window.RTCPeerConnection){rtc.state="Video non supportato su questo dispositivo";return null;}
+  var pc=new RTCPeerConnection({iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302"]}]});
+  if(rtc.local)rtc.local.getTracks().forEach(function(t){pc.addTrack(t,rtc.local);});
+  else{pc.addTransceiver("video",{direction:"recvonly"});pc.addTransceiver("audio",{direction:"recvonly"});}
+  pc.ontrack=function(e){var v=$("vRemote");if(v.srcObject!==e.streams[0]){v.srcObject=e.streams[0];v.play&&v.play().catch(function(){});}};
+  pc.onconnectionstatechange=function(){var s=pc.connectionState;
+    rtc.state=s==="connected"?"":s==="failed"?"Video non riuscito su questa rete: i punteggi vanno lo stesso":s==="disconnected"?"Video interrotto…":"Collego il video…";renderVid();};
+  rtc.state="Collego il video…";
+  return pc;
+}
+function waitIce(pc){return new Promise(function(res){if(pc.iceGatheringState==="complete")return res();var t=setTimeout(res,3500);
+  pc.addEventListener("icegatheringstatechange",function(){if(pc.iceGatheringState==="complete"){clearTimeout(t);res();}});});}
+async function startCall(){
+  await startCam();var pc=newPC();if(!pc){renderVid();return;}rtc.pc=pc;
+  try{var of=await pc.createOffer();await pc.setLocalDescription(of);await waitIce(pc);
+    rtc.offered=Date.now();await fbSet(roomPath("offer"),{t:rtc.offered,sdp:pc.localDescription});}
+  catch(e){rtc.state="Video non disponibile";}
+  renderVid();
+}
+async function answerCall(of){
+  await startCam();var pc=newPC();if(!pc){renderVid();return;}rtc.pc=pc;
+  try{await pc.setRemoteDescription(of.sdp);var an=await pc.createAnswer();await pc.setLocalDescription(an);await waitIce(pc);
+    await fbSet(roomPath("answer"),{t:of.t,sdp:pc.localDescription});}
+  catch(e){rtc.state="Video non disponibile";}
+  renderVid();
+}
+function renderVid(){
+  var on=!!online&&!online.waiting&&cur==="vGame";
+  $("vids").hidden=!on;$("gWrap").classList.toggle("online",on);
+  if(!on)return;
+  $("gWrap").classList.toggle("their",!myTurn());
+  $("vidMsg").textContent=rtc.state||(myTurn()?"Tocca a te: l'avversario ti vede":"Tira "+P().name);
+  $("vMic").textContent=rtc.mic?"Microfono sì":"Microfono no";
+}
+$("vMic").onclick=function(){rtc.mic=!rtc.mic;if(rtc.local)rtc.local.getAudioTracks().forEach(function(t){t.enabled=rtc.mic;});renderVid();};
+$("vCam").onclick=async function(){
+  rtc.facing=rtc.facing==="user"?"environment":"user";
+  if(!rtc.local)return;
+  try{var s=await navigator.mediaDevices.getUserMedia({video:{facingMode:rtc.facing,width:{ideal:640},height:{ideal:480}}});
+    var nt=s.getVideoTracks()[0],old=rtc.local.getVideoTracks()[0];
+    if(rtc.pc){var snd=rtc.pc.getSenders().filter(function(x){return x.track&&x.track.kind==="video";})[0];if(snd)await snd.replaceTrack(nt);}
+    if(old){rtc.local.removeTrack(old);old.stop();}rtc.local.addTrack(nt);$("vLocal").srcObject=rtc.local;
+  }catch(e){toast("Non riesco a cambiare telecamera");}
+};
 
 /* ---- inserimento manuale ---- */
 $("gManual").onclick=function(){$("ovBoard").hidden=false;};
@@ -989,7 +1200,9 @@ function showSummary(){
     '<div class="row"><button class="btn" id="sumUndo">Annulla ultima</button><button class="btn" id="sumMenu">Menu</button><button class="btn pri" id="sumAgain" style="flex:1">Rivincita</button></div>';
   $("ovSum").hidden=false;
   $("sumUndo").onclick=undo;$("sumMenu").onclick=quit;
-  $("sumAgain").onclick=function(){var n=game.players.map(function(q){return q.name;});if(n.length>1)n.push(n.shift());$("ovSum").hidden=true;
+  $("sumAgain").onclick=function(){
+    if(online){var o=game.players.map(function(q){return {name:q.name,dev:q.dev};});o.push(o.shift());$("ovSum").hidden=true;goFull();onlineNewGame(o);return;}
+    var n=game.players.map(function(q){return q.name;});if(n.length>1)n.push(n.shift());$("ovSum").hidden=true;
     goFull();setup.mode=game.type;setup.start=game.start;setup.inRule=game.inRule;setup.outRule=game.outRule;if(game.target)setup.h100t=game.target;newGame(n);};
 }
 
@@ -1009,7 +1222,7 @@ function saveGame(){
   if(g.type==="h100"){rec.target=g.target;rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,cnt:q.cnt};});}
   if(g.type==="rtc")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner,done:q.done,darts:q.n,hits:q.hits,reached:q.idx,per:q.per};});
   if(g.type==="b27")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,score:q.score,out:q.out,reached:q.idx,hits:q.hits,darts:q.n,per:q.per};});
-  games.push(rec);store("gb_games",games);game.savedId=rec.id;syncAfterSave();
+  if(online)online.saved[g.id]=1;games.push(rec);store("gb_games",games);game.savedId=rec.id;syncAfterSave();
 }
 function gType(g){return g.type||"x01";}
 function mineOf(name,type){var r=[];games.forEach(function(g){if(gType(g)!==type)return;g.players.forEach(function(p){if(p.name===name)r.push([g,p]);});});return r;}
