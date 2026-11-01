@@ -489,7 +489,8 @@ var JING={ // [nota, inizio s, durata s, sfuma, volume relativo] - misurati dai 
   ROUND:[["C5",0,.075],["G5",.08,.075],["G5",.2,.1,1,.3]]
 };
 function jingle(k,t){JING[k].forEach(function(x){cnote(NT[x[0]],(t||0)+x[1],x[2],(NG[x[0]]||0.55)*(x[4]||1),x[3]);});}
-function tripleJingle(n,t){jingle(JING["T"+n]?"T"+n:["T20","T19","T18","T17"][n%4],t);}
+JING.TX=[["C4",0,.08],["Eb4",.095,.08],["G4",.19,.22,1]]; // tripli non ancora registrati dalla macchina: suono neutro
+function tripleJingle(n,t){jingle(JING["T"+n]?"T"+n:"TX",t);}
 function playTriple(n,t){if(quiet)return;try{if(!ac())return;tripleJingle(n,t);}catch(e){}}
 function playJ(k,t){if(quiet)return;try{if(!ac())return;jingle(k,t);}catch(e){}}
 function play(k,t){if(quiet)return;try{if(!ac())return;SND[k](t||0);}catch(e){}}
