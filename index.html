@@ -127,6 +127,8 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .sum td:first-child,.sum th:first-child{text-align:left}
 .toast{position:fixed;left:50%;top:calc(14px + var(--st));transform:translateX(-50%);background:var(--acc);color:var(--ink);font-weight:700;border-radius:999px;padding:10px 16px;z-index:20;font-size:14px;max-width:90vw;text-align:center}
 
+/* iPad / iPhone dentro Bluefy o Safari: la barra del browser copre il fondo della pagina */
+html.iosb .view,html.iosb .ov{bottom:var(--iosbar,64px)}
 /* bot */
 #ovCap{display:none}
 .botview #ovCap{display:block;text-align:center;margin-bottom:10px;font-size:18px}
@@ -159,7 +161,7 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .sgrid>div{background:var(--card);padding:12px}
 .games .g{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
 
-@media (orientation:landscape) and (max-height:600px){
+@media (orientation:landscape) and (max-height:860px){
   .view{padding-top:calc(8px + var(--st))}
   h1.hero{font-size:52px;margin-top:14px}
   .gwrap{display:grid;grid-template-columns:minmax(200px,30%) 1fr;grid-template-rows:1fr auto;gap:10px 16px;margin-top:6px}
@@ -308,6 +310,9 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 <script>
 (function(){
 "use strict";
+(function(){var ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  var sa=window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+  if(ios&&!sa)document.documentElement.classList.add("iosb");})();
 /* ================= costanti ================= */
 var SVC="442f1570-8a00-9a28-cbe1-e1d4212d53eb";
 // mappa ricavata dalla scansione della tua Granboard (31/10/2026)
