@@ -902,7 +902,8 @@ function showSummary(){
       q.turns.forEach(function(t,i){var sc=t.bust?0:t.start-(i<q.turns.length-1?q.turns[i+1].start:q.score);hi=Math.max(hi,sc);if(sc===180)c180++;else if(sc>=140)c140++;else if(sc>=100)c100++;});
       return '<tr><td>'+esc(q.name)+'</td><td>'+fmt(s.avg)+'</td><td>'+fmt(s.f9)+'</td><td>'+s.darts+'</td><td>'+hi+'</td><td>'+c100+'/'+c140+'/'+c180+'</td></tr>';}).join("");
     var lt=w.turns[w.turns.length-1];
-    head='<div class="kl">Vince</div><h3>'+esc(w.name)+'</h3><div class="small">Chiusura da '+lt.start+' in '+pStats(w).darts+' frecce</div>';
+    var ca=0;if(g.outRule==="double")w.turns.forEach(function(t){t.darts.forEach(function(d){if(isCoDart(d.b,"double"))ca++;});});
+    head='<div class="kl">Vince</div><h3>'+esc(w.name)+'</h3><div class="small">Chiusura da '+lt.start+' in '+pStats(w).darts+' frecce'+(ca?' · '+ca+(ca===1?' freccia':' frecce')+' sul doppio':'')+'</div>';
     body='<table><tr><th>Giocatore</th><th>Media</th><th>Prime 9</th><th>Frecce</th><th>Max</th><th>100·140·180</th></tr>'+rows+'</table>';
   }
   if(ty==="h100"){
@@ -972,7 +973,7 @@ function renderStats(){
     $("sTitle").textContent="501 · partite concluse";
     var s=statsFor(statSel);
     cells=[["Media 3 frecce",fmt(s.avg)],["Prime 9",fmt(s.f9)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
-      ["% chiusura (double out)",s.coPct==null?"—":fmt(s.coPct,0)+"%"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
+      ["% chiusura (solo double out)",s.coPct==null?"—":fmt(s.coPct,0)+'% <span style="font-size:14px;color:var(--mut)">'+s.coH+' su '+s.coA+' frecce</span>'],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
     var vb={};mine.forEach(function(gp){gp[0].players.forEach(function(q){var l=botLevel(q.name);if(l){vb[l]=vb[l]||[0,0];vb[l][1]++;if(gp[1].won)vb[l][0]++;}});});
     var lv=Object.keys(vb).sort(function(a,b){return a-b;});
     if(lv.length)extra='<div class="sect">Contro il bot · vinte su giocate</div><div class="dgrid">'+lv.map(function(l){return '<div><b>Liv. '+l+'</b><span>'+vb[l][0]+' su '+vb[l][1]+'</span></div>';}).join("")+'</div>';
