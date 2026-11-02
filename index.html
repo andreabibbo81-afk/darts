@@ -1468,10 +1468,7 @@ function perTable(mine,out){
     ["Leg",function(a){return [a.legs,null];}],
     ["Frecce",function(a){return [a.darts,null];}],
     ["Media 3 frecce",function(a){return avg3([a.pts,a.darts]);},1],
-    ["Frecce per leg",function(a){return a.legs?[fmt(a.darts/a.legs),a.darts/a.legs]:null;},-1],
-    ["Media da solo",function(a){return avg3(a.opp.solo);},1],
-    ["Media contro bot",function(a){return avg3(a.opp.bot);},1],
-    ["Media contro amici",function(a){return avg3(a.opp.amici);},1]]]);
+    ["Frecce per leg",function(a){return a.legs?[fmt(a.darts/a.legs),a.darts/a.legs]:null;},-1]]]);
   var co=[["Media chiusura",function(a){return a.coN?[fmt(a.coSum/a.coN),a.coSum/a.coN]:null;},1],
     ["Chiusura più alta",function(a){return a.coN?[a.coHi,a.coHi]:null;},1]];
   if(dbl)co.push(["Doppi",function(a){return a.coA?[a.coH+"/"+a.coA,null]:null;}],
