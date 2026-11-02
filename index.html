@@ -699,7 +699,7 @@ function newGame(names){
       if(m==="rtc"){p.idx=0;p.n=0;p.hits=0;p.per=[];}
       if(m==="b27"){p.score=27;p.idx=0;p.n=0;p.hits=0;p.per=[];p.out=false;}
       return p;}),
-    cur:0,wait:false,over:false,winner:null,savedId:null};
+    cur:0,wait:false,ready:false,over:false,winner:null,savedId:null};
   game.players[0].turns.push(newTurn(game.players[0]));
   undoStack=[];show("vGame");play("start");
   say(m==="x01"?"Partita "+game.start+", tira "+names[0]:MODE_NAMES[m]+", tira "+names[0]);
@@ -709,21 +709,24 @@ function P(){return game.players[game.cur];}
 function T(){var p=P();return p.turns[p.turns.length-1];}
 function snap(){undoStack.push(JSON.stringify(game));if(undoStack.length>400)undoStack.shift();}
 function finOK(zi){if(game.outRule==="single")return true;if(game.outRule==="double")return !!zi.dbl;return !!(zi.dbl||zi.trp);}
+function notReady(){return !!(game&&!game.over&&game.ready===false);}
+function startGo(){
+  if(online&&!myTurn()){toast("Deve iniziare "+P().name);return;}
+  game.ready=true;play("change");say("Via, tira "+P().name);toast("Via!");renderGame();
+}
 function onButton(){
   if(cur!=="vGame"){return;}
   if(!$("ovSum").hidden){$("sumAgain")&&$("sumAgain").click();return;}
+  if(notReady()){startGo();return;}
   if(game&&!game.over&&P().bot&&!game.wait)return;
   nextPlayer();
 }
 function throwDart(z,fromBot){
   if(!game||game.over)return;
   if(online&&!myTurn()){toast("Tocca a "+P().name);return;}
+  if(notReady()){toast("Premi il pulsante della board per iniziare");return;}
   if(P().bot&&!fromBot){toast("Sta tirando "+P().name);return;}
-  if(game.wait){
-    if(game.type==="x01"){toast("Togli le freccette e premi il pulsante della board");play("out");return;}
-    nextPlayer(); // negli allenamenti la freccia successiva fa partire da sola la nuova volée
-    if(!game||game.over)return;
-  }
+  if(game.wait){toast("Togli le freccette e premi il pulsante della board");play("out");return;}
   snap();
   if(game.type==="x01")dartX01(z);else dartOther(z);
   if(fromBot){var td=T().darts;td[td.length-1].xy=botXY;}
@@ -811,6 +814,7 @@ function endGame(){
 function nextPlayer(){
   if(!game||game.over)return;
   if(online&&!myTurn())return;
+  if(notReady())return;
   var t=T(),p=P(),n=game.players.length;
   if(!game.wait&&!t.darts.length&&n===1){return;}
   snap();
@@ -891,6 +895,7 @@ function renderGame(anim){
   $("gTT").innerHTML=tt;
   var h="";
   if(g.over)h='<span class="msg">Partita finita</span>';
+  else if(g.ready===false)h='<span class="msg w">Premi il pulsante della board per iniziare</span>';
   else if(g.wait)h='<span class="msg w">Togli le freccette · premi il pulsante</span>';
   else if(ty==="x01"){
     if(!p.opened)h='<span class="msg mut">Serve un doppio per entrare</span>';
@@ -907,15 +912,15 @@ function renderGame(anim){
   else if(ty==="rtc")st='<span>A segno <b>'+pct(p.hits,p.n)+'</b></span>';
   else st='<span>Doppi presi <b>'+p.hits+'</b> su <b>'+p.n+'</b> frecce</span>';
   $("gStat").innerHTML=st;
-  $("gNext").textContent=g.over?"Riepilogo":(many?"Cambio":"Prossimo");
-  $("gNext").classList.toggle("pulse",g.wait&&!g.over);
+  $("gNext").textContent=g.over?"Riepilogo":g.ready===false?"Inizia":(many?"Cambio":"Prossimo");
+  $("gNext").classList.toggle("pulse",(g.wait||g.ready===false)&&!g.over);
   if(online&&!g.over)$("gName").textContent=myTurn()?"Tocca a te":"Tira "+p.name;
   botCheck();
   if(online)onlinePush();
   renderVid();
 }
 $("gUndo").onclick=undo;$("mUndo").onclick=undo;
-$("gNext").onclick=function(){if(game&&game.over)showSummary();else nextPlayer();};
+$("gNext").onclick=function(){if(game&&game.over)showSummary();else if(notReady())startGo();else nextPlayer();};
 $("gQuit").onclick=function(){if(!game||game.over||!undoStack.length){quit();return;}$("ovQuit").hidden=false;};
 $("qNo").onclick=function(){$("ovQuit").hidden=true;};
 $("qYes").onclick=function(){$("ovQuit").hidden=true;quit();};
@@ -952,7 +957,7 @@ function botAim(p){
 var botT=null;
 function botCheck(){
   clearTimeout(botT);botT=null;
-  var on=!!(game&&cur==="vGame"&&!game.over&&P().bot);
+  var on=!!(game&&cur==="vGame"&&!game.over&&game.ready!==false&&P().bot);
   botBoard(on);
   if(on)botT=setTimeout(botAct,game.wait?1800:1000);
 }
