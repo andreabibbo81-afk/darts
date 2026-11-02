@@ -446,6 +446,7 @@ html.nogap .gstat>*+*{margin-left:22px}
   <div class="games" id="sGames"></div>
   <div class="sect">Copia di sicurezza</div>
   <div class="row"><button class="btn" id="sCopy">Copia i dati</button><button class="btn" id="sImpBtn">Incolla dati</button></div>
+  <button class="btn" id="sClear" style="margin-top:10px;color:var(--red);border-color:var(--red)">Cancella tutte le partite</button>
   <div id="sImp" hidden style="margin-top:8px"><textarea id="sImpTxt" style="width:100%;min-height:90px;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px;user-select:text"></textarea><button class="btn" id="sImpGo" style="margin-top:6px">Importa</button></div>
   <div class="grow"></div>
   <nav class="tabs"></nav>
@@ -493,6 +494,7 @@ html.nogap .gstat>*+*{margin-left:22px}
   <div class="small" id="ovHint" style="margin-top:8px">Tocca il punto colpito</div>
 </div>
 <div class="ov" id="ovSum" hidden><div class="sum" id="sumBox"></div></div>
+<div class="ov" id="ovClear" hidden><div class="sum"><h3>Cancello tutte le partite?</h3><p class="small">Si cancellano tutte le partite salvate di tutti i giochi e di tutti i giocatori, anche sugli altri dispositivi collegati con il codice. I nomi dei giocatori restano. Non si può annullare: se vuoi tenerne una copia, prima premi «Copia i dati».</p><div class="row"><button class="btn" id="cNo">Annulla</button><button class="btn pri" id="cYes" style="background:var(--red);border-color:var(--red);color:#fff">Cancella tutto</button></div></div></div>
 <div class="ov" id="ovQuit" hidden><div class="sum"><h3>Esci?</h3><p class="small">La partita in corso non verrà salvata nelle statistiche.</p><div class="row"><button class="btn" id="qNo">Continua</button><button class="btn pri" id="qYes">Esci</button></div></div></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -1095,6 +1097,14 @@ $("gUndo").onclick=undo;$("mUndo").onclick=undo;
 $("gNext").onclick=function(){if(game&&game.over)showSummary();else if(notReady())startGo();else nextPlayer();};
 $("gQuit").onclick=function(){if(!game||game.over||!undoStack.length){quit();return;}$("ovQuit").hidden=false;};
 $("qNo").onclick=function(){$("ovQuit").hidden=true;};
+$("sClear").onclick=function(){$("ovClear").hidden=false;};
+$("cNo").onclick=function(){$("ovClear").hidden=true;};
+$("cYes").onclick=function(){
+  $("ovClear").hidden=true;
+  games.forEach(function(g){if(!isDel(g.id))deleted.push(g.id);});store("gb_deleted",deleted);
+  var n=games.length;games=[];store("gb_games",games);heatK=null;
+  renderStats();toast(n+" partite cancellate: si riparte da zero");syncNow(true);
+};
 $("qYes").onclick=function(){$("ovQuit").hidden=true;quit();};
 function quit(){clearTimeout(botT);botBoard(false);onlineStop();game=null;$("ovSum").hidden=true;show("vHome");}
 
@@ -1662,7 +1672,7 @@ $("sCopy").onclick=function(){var t=JSON.stringify({players:players,games:games}
   if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("Dati copiati ✓");},function(){toast("Copia non riuscita");});};
 $("sImpBtn").onclick=function(){$("sImp").hidden=!$("sImp").hidden;};
 $("sImpGo").onclick=function(){try{var d=JSON.parse($("sImpTxt").value);var ids={};games.forEach(function(g){ids[g.id]=1;});var n=0;
-  (d.games||[]).forEach(function(g){if(!ids[g.id]){games.push(g);n++;}});(d.players||[]).forEach(function(p){if(players.indexOf(p)<0)players.push(p);});
+  (d.games||[]).forEach(function(g){if(!ids[g.id]){games.push(g);n++;}});deleted=deleted.filter(function(id){return !(d.games||[]).some(function(g){return g.id===id;});});store("gb_deleted",deleted);if(syncCode())fbPutDel(deleted).catch(function(){});(d.players||[]).forEach(function(p){if(players.indexOf(p)<0)players.push(p);});
   games.sort(function(a,b){return a.id-b.id;});store("gb_games",games);store("gb_players",players);toast(n+" partite importate");$("sImp").hidden=true;renderStats();syncNow(true);}catch(e){toast("Testo non valido");}};
 
 /* ================= statistiche su più dispositivi (Firebase Firestore, via REST) ================= */
@@ -1686,9 +1696,13 @@ async function fbListGames(){
   }while(tok);
   return out;
 }
+async function fbGetDel(){var r=await fetch(fbUrl("/info/cancellate"));if(r.status===404)return [];if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();try{return JSON.parse(j.fields.dati.stringValue);}catch(e){return [];}}
+async function fbPutDel(d){var r=await fetch(fbUrl("/info/cancellate"),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{dati:{stringValue:JSON.stringify(d)}}})});if(!r.ok)throw new Error("HTTP "+r.status);}
 async function fbGetPlayers(){var r=await fetch(fbUrl("/info/giocatori"));if(r.status===404)return [];if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();try{return JSON.parse(j.fields.dati.stringValue);}catch(e){return [];}}
 async function fbPutPlayers(p){var r=await fetch(fbUrl("/info/giocatori"),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{dati:{stringValue:JSON.stringify(p)}}})});if(!r.ok)throw new Error("HTTP "+r.status);}
 var pendingDel=load("gb_sync_del",[]);
+var deleted=load("gb_deleted",[]); // partite cancellate: non devono tornare dagli altri dispositivi
+function isDel(id){return deleted.indexOf(id)>=0;}
 async function syncNow(quietly){
   if(!syncCode()||sync.busy)return;
   if(!navigator.onLine){sync.err="offline";renderSyncBox();return;}
@@ -1696,10 +1710,15 @@ async function syncNow(quietly){
   try{
     // 1. cancellazioni rimaste in sospeso (es. "Annulla chiusura")
     for(var i=pendingDel.length-1;i>=0;i--){await fbDelGame(pendingDel[i]);pendingDel.splice(i,1);store("gb_sync_del",pendingDel);}
+    // 1b. elenco delle partite cancellate (in comune tra i dispositivi)
+    var rdel=await fbGetDel(),chD=false;
+    rdel.forEach(function(id){if(!isDel(id)){deleted.push(id);chD=true;}});if(chD)store("gb_deleted",deleted);
+    if(deleted.some(function(id){return rdel.indexOf(id)<0;}))await fbPutDel(deleted);
+    if(games.some(function(g){return isDel(g.id);})){games=games.filter(function(g){return !isDel(g.id);});store("gb_games",games);if(cur==="vStats"||cur==="vHome")show(cur);}
     // 2. scarico le partite degli altri dispositivi e le unisco
     var remote=await fbListGames(),ids={},rids={},added=0;
     games.forEach(function(g){ids[g.id]=1;});
-    remote.forEach(function(g){rids[g.id]=1;if(!ids[g.id]){games.push(g);ids[g.id]=1;added++;}});
+    for(var r=0;r<remote.length;r++){var g=remote[r];if(isDel(g.id)){await fbDelGame(g.id);continue;}rids[g.id]=1;if(!ids[g.id]){games.push(g);ids[g.id]=1;added++;}}
     games.sort(function(a,b){return a.id-b.id;});store("gb_games",games);
     // 3. carico quelle che il server non ha ancora
     var up=games.filter(function(g){return !rids[g.id];});
