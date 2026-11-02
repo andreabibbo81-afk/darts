@@ -1006,6 +1006,13 @@ function undo(){
   if(wasSaved&&!game.over){games=games.filter(function(g){return g.id!==wasSaved;});store("gb_games",games);game.savedId=null;syncAfterDelete(wasSaved);}
   $("ovSum").hidden=true;renderGame();
 }
+// media di oggi: partite 501 già salvate oggi (stessa partenza e chiusura) + la partita in corso, freccia per freccia
+function todayAvg(p,s){
+  var day=new Date().toDateString(),pts=s.pts,d=s.darts;
+  games.forEach(function(g){if(gType(g)!=="x01"||g.id===game.savedId||g.start!==game.start||g.outRule!==game.outRule||new Date(g.date).toDateString()!==day)return;
+    g.players.forEach(function(q){if(q.name===p.name){pts+=q.pts;d+=q.darts;}});});
+  return d?pts/d*3:0;
+}
 function pStats(p){
   var pts=game.start-p.score,d=0,first=0,fd=0;
   p.turns.forEach(function(t,i){d+=t.darts.length;if(i<3){fd+=t.darts.length;first+=t.bust?0:(t.start-(i<p.turns.length-1?p.turns[i+1].start:p.score));}});
@@ -1072,7 +1079,7 @@ function renderGame(anim){
   else if(ty==="b27"){var nn=B27[p.idx],vv=nn===25?50:nn*2;h='<span class="small cot">Bersaglio</span><span class="co fin">'+dName(nn)+'</span><span class="small">± '+vv+'</span>';}
   $("gHint").innerHTML=h;
   var st="";
-  if(ty==="x01"){var s=pStats(p);st='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Prime 9 <b>'+fmt(s.f9)+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';}
+  if(ty==="x01"){var s=pStats(p);st='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Oggi <b>'+fmt(todayAvg(p,s))+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';}
   else if(ty==="h100"){var b=hBreak(p.cnt,g.target);st=(g.target===25?'':'<span>T <b>'+b.T+'</b></span>')+'<span>D <b>'+b.D+'</b></span><span>S <b>'+b.S+'</b></span><span>A segno <b>'+pct(b.on,p.n)+'</b></span>';}
   else if(ty==="rtc")st='<span>A segno <b>'+pct(p.hits,p.n)+'</b></span>';
   else st='<span>Doppi presi <b>'+p.hits+'</b> su <b>'+p.n+'</b> frecce</span>';
