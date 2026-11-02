@@ -1404,7 +1404,7 @@ function statsFor(name,list){
   var o={games:0,wins:0,pts:0,darts:0,f9s:0,best:null,hiCo:0,c100:0,c140:0,c180:0,coA:0,coH:0,hi:0};
   (list||mineOf(name,"x01")).forEach(function(gp){var g=gp[0],p=gp[1];
     o.games++;if(p.won){o.wins++;if(o.best==null||p.darts<o.best)o.best=p.darts;o.hiCo=Math.max(o.hiCo,p.co);}
-    o.pts+=p.pts;o.darts+=p.darts;o.f9s+=p.f9;o.c100+=p.c100;o.c140+=p.c140;o.c180+=p.c180;
+    o.pts+=p.pts;o.darts+=p.darts;o.f9s+=p.f9;o.c100+=p.c100||0;o.c140+=p.c140||0;o.c180+=p.c180||0;
     if(g.outRule==="double"){o.coA+=p.coA;if(p.won)o.coH++;}
     p.turns.forEach(function(t){o.hi=Math.max(o.hi,t);});});
   o.avg=o.darts?o.pts/o.darts*3:0;o.f9=o.games?o.f9s/o.games:0;o.coPct=o.coA?o.coH/o.coA*100:null;
