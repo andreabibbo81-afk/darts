@@ -438,6 +438,9 @@ html.nogap .gstat>*+*{margin-left:22px}
   <div class="card" id="syncBox"></div>
   <div class="sect">Bull</div>
   <div class="seg" data-set="fatBull"><button data-v="0">25 / 50</button><button data-v="1">50 / 50</button></div>
+  <div class="sect">Luci della board</div>
+  <div class="toggle"><span>Spegni le luci colorate della board</span><button class="sw" data-sw="ledOff"></button></div>
+  <div class="small">Le luci si spengono quando la board si collega e a ogni cambio di turno. Per riaccenderle disattiva questa voce e spegni e riaccendi la board.</div>
   <div class="sect">Suoni</div>
   <div class="row"><span class="small" style="width:70px">Volume</span><input type="range" id="setVol" min="0" max="100"><span class="mono" id="setVolV" style="width:44px;text-align:right"></span></div>
   <div class="toggle"><span>Voce che annuncia il punteggio</span><button class="sw" data-sw="voice"></button></div>
@@ -483,7 +486,7 @@ var ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 /* ================= archivio ================= */
 function load(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-var settings=Object.assign({code:"",vol:85,fatBull:false,voice:false,vibe:true,full:true},load("gb_settings",{}));
+var settings=Object.assign({code:"",vol:85,fatBull:false,voice:false,vibe:true,full:true,ledOff:true},load("gb_settings",{}));
 var setup=Object.assign({bot:0,mode:"x01",h100t:20,start:501,inRule:"open",outRule:"double",players:["Io"]},load("gb_setup",{}));
 var players=load("gb_players",["Io"]);
 var games=load("gb_games",[]);
@@ -642,9 +645,25 @@ async function attach(dev){
   var srv=await dev.gatt.connect();
   var svc=await srv.getPrimaryService(SVC);
   var chars=await svc.getCharacteristics(),n=0;
-  for(var c of chars){if(c.properties.notify||c.properties.indicate){c.addEventListener("characteristicvaluechanged",onNotify);await c.startNotifications();n++;}}
+  bt.w=null;
+  for(var c of chars){if(c.properties.notify||c.properties.indicate){c.addEventListener("characteristicvaluechanged",onNotify);await c.startNotifications();n++;}
+    else if(!bt.w&&(c.properties.write||c.properties.writeWithoutResponse))bt.w=c;}
   if(!n)throw new Error("nessun canale di segnali");
   setConn("on");play("double");toast("Granboard collegata ✓");wake();
+  setTimeout(ledOff,400);
+}
+/* luci della board: 20 byte a zero = tutti i numeri spenti; 0x14 con colore nero fisso = anello spento */
+var ledQ=Promise.resolve();
+function ledSend(bytes){
+  if(!bt.w||bt.state!=="on")return;
+  var c=bt.w,a=new Uint8Array(bytes);
+  ledQ=ledQ.then(function(){return (c.properties.writeWithoutResponse&&c.writeValueWithoutResponse?c.writeValueWithoutResponse(a):c.writeValue(a));})
+    .then(function(){return new Promise(function(r){setTimeout(r,80);});}).catch(function(){});
+}
+function ledOff(){
+  if(!settings.ledOff)return;
+  ledSend(new Array(20).fill(0));
+  ledSend([0x14,0,0,0,0,0,0,0,0,0,0x10,0,0x14,0,0,1]);
 }
 async function connect(){
   var why=btSupport();if(why){toast(why,4000);$("setBT").textContent=why;return;}
@@ -787,7 +806,7 @@ function newGame(names){
       return p;}),
     cur:0,wait:false,ready:false,over:false,winner:null,savedId:null};
   game.players[0].turns.push(newTurn(game.players[0]));
-  undoStack=[];show("vGame");play("start");
+  undoStack=[];show("vGame");play("start");ledOff();
   say(m==="x01"?"Partita "+game.start+", tira "+names[0]:MODE_NAMES[m]+", tira "+names[0]);
   wake();renderGame();
 }
@@ -798,7 +817,7 @@ function finOK(zi){if(game.outRule==="single")return true;if(game.outRule==="dou
 function notReady(){return !!(game&&!game.over&&game.ready===false);}
 function startGo(){
   if(online&&!myTurn()){toast("Deve iniziare "+P().name);return;}
-  game.ready=true;play("change");say("Via, tira "+P().name);toast("Via!");renderGame();
+  game.ready=true;ledOff();play("change");say("Via, tira "+P().name);toast("Via!");renderGame();
 }
 function onButton(){
   if(cur!=="vGame"){return;}
@@ -917,7 +936,7 @@ function nextPlayer(){
   var i=game.cur;for(var k=0;k<n;k++){i=(i+1)%n;if(!game.players[i].done)break;}
   game.cur=i;
   var np=P();np.turns.push(newTurn(np));
-  play("change");if(n>1)say("Tocca a "+np.name);renderGame();
+  play("change");ledOff();if(n>1)say("Tocca a "+np.name);renderGame();
 }
 function undo(){
   if(online&&!myTurn()){toast("Puoi annullare solo le tue freccette");return;}
@@ -1485,7 +1504,7 @@ function renderSet(){
 }
 $("setVol").oninput=function(){settings.vol=+this.value;$("setVolV").textContent=this.value+"%";if(master)master.gain.value=settings.vol/100*1.5;saveSettings();};
 document.querySelectorAll("[data-set=fatBull] button").forEach(function(b){b.onclick=function(){settings.fatBull=b.dataset.v==="1";saveSettings();buildSegs();renderSet();};});
-document.querySelectorAll("[data-sw]").forEach(function(b){b.onclick=function(){settings[b.dataset.sw]=!settings[b.dataset.sw];saveSettings();renderSet();if(b.dataset.sw==="voice")say("Voce attiva");};});
+document.querySelectorAll("[data-sw]").forEach(function(b){b.onclick=function(){settings[b.dataset.sw]=!settings[b.dataset.sw];saveSettings();renderSet();if(b.dataset.sw==="voice")say("Voce attiva");if(b.dataset.sw==="ledOff"&&settings.ledOff){ledOff();toast(bt.w?"Luci spente":"Collega la board per spegnere le luci");}};});
 $("setConnBtn").onclick=function(){if(bt.state==="on"&&bt.dev){manualOff=true;bt.dev.gatt.disconnect();}else connect();};
 $("setDemo").onclick=function(){ac();playTriple(20,0);playTriple(19,1.1);playTriple(18,2.3);playTriple(17,3.4);playJ("BULL",4.6);playJ("DBULL",5.3);playJ("ROUND",6.6);playTriple(12,7.3);};
 
