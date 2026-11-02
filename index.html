@@ -1687,7 +1687,7 @@ $("setDemo").onclick=function(){ac();playTriple(20,0);playTriple(19,1.1);playTri
 
 /* ================= avvio ================= */
 buildSegs();setConn("off");show("vHome");autoReconnect();syncNow(true);
-if("serviceWorker" in navigator&&location.protocol==="https:"){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
+if("serviceWorker" in navigator&&location.protocol==="https:"){try{navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(function(){});}catch(e){}}
 })();
 </script>
 </body>
