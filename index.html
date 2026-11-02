@@ -1058,7 +1058,7 @@ function hBreak(cnt,t){ // 100 frecce: tripli, doppi, singoli del numero scelto 
   var o={T:0,D:0,S:0,Si:0,So:0,miss:cnt.MISS||0,oth:{},darts:0};
   for(var z in cnt){var c=cnt[z];o.darts+=c;if(z==="MISS")continue;var zi=zone(z);
     if(zi.seg===t){if(zi.trp)o.T+=c;else if(zi.dbl)o.D+=c;else{o.S+=c;if(/i$/.test(z))o.Si+=c;else if(/o$/.test(z))o.So+=c;}}
-    else{var k=zi.bull?"Bull":String(zi.seg);o.oth[k]=(o.oth[k]||0)+c;}}
+    else{var k=zi.bull?(zi.dbl?"Bull 50":"Bull 25"):(zi.trp?"Triplo ":zi.dbl?"Doppio ":"Singolo ")+zi.seg;o.oth[k]=(o.oth[k]||0)+c;}}
   o.on=o.T+o.D+o.S;
   o.others=Object.keys(o.oth).map(function(k){return [k,o.oth[k]];}).sort(function(a,b){return b[1]-a[1];});
   return o;
@@ -1390,7 +1390,7 @@ function brkHtml(b,n,t){
   var h='<table><tr><th>Sul '+tName(t)+'</th><th>Frecce</th><th>%</th></tr>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+pct(r[1],n)+'</td></tr>';}).join("")+
     '<tr><td><b>Totale a segno</b></td><td><b>'+b.on+'</b></td><td><b>'+pct(b.on,n)+'</b></td></tr></table>';
   var oth=b.others.slice();if(b.miss)oth.push(["Fuori",b.miss]);
-  if(oth.length)h+='<table><tr><th>Altri numeri colpiti</th><th>Frecce</th><th>%</th></tr>'+oth.map(function(r){return '<tr><td>'+(r[0]==="Fuori"||r[0]==="Bull"?r[0]:"Il "+r[0])+'</td><td>'+r[1]+'</td><td>'+pct(r[1],n)+'</td></tr>';}).join("")+'</table>';
+  if(oth.length)h+='<table><tr><th>Altri numeri colpiti</th><th>Frecce</th><th>%</th></tr>'+oth.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+pct(r[1],n)+'</td></tr>';}).join("")+'</table>';
   return h;
 }
 function showSummary(){
@@ -1444,7 +1444,8 @@ function saveGame(){
       return {name:q.name,won:i===g.winner,pts:s.pts,darts:s.darts,f9:s.f9,turns:turns,c100:c100,c140:c140,c180:c180,coA:coA,co:i===g.winner?q.turns[q.turns.length-1].start:0,tt:tt};
     });
   }
-  if(g.type==="h100"){rec.target=g.target;rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,cnt:q.cnt};});}
+  if(g.type==="h100"){rec.target=g.target;rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,cnt:q.cnt,
+    tz:q.turns.filter(function(t){return t.darts.length;}).map(function(t){return t.darts.map(function(d){return d.z;});})};});}
   if(g.type==="rtc")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner,done:q.done,darts:q.n,hits:q.hits,reached:q.idx,per:q.per};});
   if(g.type==="b27")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,score:q.score,out:q.out,reached:q.idx,hits:q.hits,darts:q.n,per:q.per};});
   if(online)online.saved[g.id]=1;games.push(rec);store("gb_games",games);game.savedId=rec.id;syncAfterSave();
@@ -1569,6 +1570,53 @@ function heatSection(mine){
     '<div class="small" style="text-align:center;margin-bottom:10px">Più è giallo, più frecce sono finite lì · '+G.n+' frecce. Le percentuali sono sul totale delle frecce tirate.</div>'+
     '<div class="hlist">'+rows.join("")+'</div>';
 }
+// ---- 100 frecce: statistiche per periodo (giorno, settimana, mese, anno) sul numero scelto ----
+function h100Agg(sel,target){
+  var a={n:0,darts:0,pts:0,on:0,T:0,D:0,S:0,M:0,det:0,p1:0,p2:0,mx:{pts:null,T:null,D:null,S:null,p1:null,p2:null},
+    run:{on:0,T:0,D:0,S:0,M:0},vol:[0,0,0,0,0,0,0,0,0,0]};
+  function mx(k,v){if(a.mx[k]==null||v>a.mx[k])a.mx[k]=v;}
+  sel.forEach(function(gp){var p=gp[1],b=hBreak(p.cnt||{},target);
+    a.n++;a.darts+=p.darts;a.pts+=p.pts;a.on+=b.on;a.T+=b.T;a.D+=b.D;a.S+=b.S;a.M+=p.darts-b.on;
+    mx("pts",p.pts);mx("T",b.T);mx("D",b.D);mx("S",b.S);
+    if(!p.tz)return;
+    a.det++;var k=0,h1=0,h2=0,cur={on:0,T:0,D:0,S:0,M:0};
+    p.tz.forEach(function(t){var vp=0;
+      t.forEach(function(z){var zi=zone(z),hit=z!=="MISS"&&zi.seg===target,v=hit?(zi.bull?(zi.dbl?2:1):zi.mult):0;vp+=v;
+        if(k<50)h1+=v;else h2+=v;k++;
+        var f={on:hit,T:hit&&!!zi.trp,D:hit&&!!zi.dbl,S:hit&&!zi.trp&&!zi.dbl,M:!hit};
+        for(var q in cur){cur[q]=f[q]?cur[q]+1:0;if(cur[q]>a.run[q])a.run[q]=cur[q];}});
+      a.vol[Math.min(9,vp)]++;});
+    a.p1+=h1;a.p2+=h2;mx("p1",h1);mx("p2",h2);});
+  return a;
+}
+function h100PerTable(sel,target){
+  var groups={},order=[];
+  sel.forEach(function(gp){var pk=perKey(new Date(gp[0].date),sv.per);if(!groups[pk.k]){groups[pk.k]={h:pk.h,list:[]};order.push(pk.k);}groups[pk.k].list.push(gp);});
+  order.sort().reverse();
+  var cols=order.slice(0,12).map(function(k){return {h:groups[k].h,a:h100Agg(groups[k].list,target)};});
+  if(!cols.length)return "";
+  var bull=target===25;
+  function P(f){return function(a){return a.darts?[fmt(f(a)/a.darts*100)+"%",f(a)/a.darts]:null;};}
+  function N(f){return function(a){return a.n?[f(a),f(a)]:null;};}
+  function D(f){return function(a){return a.det?f(a):null;};}
+  function avg(f){return function(a){return a.n?[fmt(f(a)/a.n),f(a)/a.n]:null;};}
+  var secs=[["Sessioni",[["Sessioni",function(a){return [a.n,null];}]]]];
+  secs.push(["% di precisione",[["A segno",P(function(a){return a.on;}),1]].concat(bull?[]:[["Tripli",P(function(a){return a.T;}),1]]).concat([
+    ["Doppi",P(function(a){return a.D;}),1],["Singoli",P(function(a){return a.S;}),1],["Mancati",P(function(a){return a.M;}),-1]])]);
+  secs.push(["Frecce",[["Tirate",function(a){return [a.darts,null];}],["A segno",N(function(a){return a.on;}),1]].concat(bull?[]:[["Tripli",N(function(a){return a.T;}),1]]).concat([
+    ["Doppi",N(function(a){return a.D;}),1],["Singoli",N(function(a){return a.S;}),1],["Mancati",N(function(a){return a.M;}),-1]])]);
+  secs.push(["Media punti",[["100 frecce",avg(function(a){return a.pts;}),1],
+    ["Prime 50",D(function(a){return [fmt(a.p1/a.det),a.p1/a.det];}),1],["Seconde 50",D(function(a){return [fmt(a.p2/a.det),a.p2/a.det];}),1]]]);
+  function M(k){return function(a){return a.mx[k]!=null?[a.mx[k],a.mx[k]]:null;};}
+  secs.push(["Massimo in una sessione",[["Punti",M("pts"),1]].concat(bull?[]:[["Tripli",M("T"),1]]).concat([["Doppi",M("D"),1],["Singoli",M("S"),1],
+    ["Punti prime 50",D(M("p1")),1],["Punti seconde 50",D(M("p2")),1]])]);
+  function R(k,b){return [k==="on"?"A segno":k==="T"?"Tripli":k==="D"?"Doppi":k==="S"?"Singoli":"Mancati",D(function(a){return [a.run[k],a.run[k]];}),b];}
+  secs.push(["Di fila (serie più lunga)",[R("on",1)].concat(bull?[]:[R("T",1)]).concat([R("D",1),R("S",1),R("M",-1)])]);
+  var vr=[];for(var v=bull?6:9;v>=0;v--)(function(v){vr.push([v+(v===1?" punto":" punti"),D(function(a){return [a.vol[v],null];})]);})(v);
+  secs.push(["Volée per punti (3 frecce)",vr]);
+  var old=cols.some(function(c){return c.a.det<c.a.n;});
+  return ptHtml(cols,secs)+(old?'<div class="small" style="margin-top:6px">Le sessioni giocate prima di questo aggiornamento non hanno l\'ordine delle frecce: per quelle mancano prime/seconde 50, serie di fila e volée per punti.</div>':'');
+}
 function avg3(x){return x[1]?[fmt(x[0]/x[1]*3),x[0]/x[1]*3]:null;}
 function topList(o,i,num){var l=Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1]||(num?b[0]-a[0]:0);});return l[i]?[esc(l[i][0])+"<small>"+l[i][1]+"×</small>",null]:null;}
 function perTable(mine,out){
@@ -1609,6 +1657,11 @@ function perTable(mine,out){
   var t10=[],g10=[];for(var r=0;r<10;r++)(function(r){t10.push([String(r+1),function(a){return topList(a.sc,r,true);}]);g10.push([String(r+1),D(function(a){return topList(a.tg,r,false);})]);})(r);
   secs.push(["Top 10 punteggi",t10]);
   secs.push(["Top 10 bersagli",g10]);
+  var h=ptHtml(cols,secs);
+  var old=cols.some(function(c){return c.a.det<c.a.legs;});
+  return h+(old?'<div class="small" style="margin-top:6px">Le partite giocate prima di questo aggiornamento non hanno il dettaglio freccia per freccia: per quelle mancano bersagli, media per freccia, tripli e chance per singolo doppio.</div>':'');
+}
+function ptHtml(cols,secs){
   var h='<div class="ptw"><table class="pt"><thead><tr><th></th>'+cols.map(function(c){return '<th>'+c.h+'</th>';}).join("")+'</tr></thead><tbody>';
   secs.forEach(function(s){
     h+='<tr class="sh"><td>'+s[0]+'</td>'+cols.map(function(){return '<td></td>';}).join("")+'</tr>';
@@ -1620,8 +1673,7 @@ function perTable(mine,out){
     });
   });
   h+='</tbody></table></div>';
-  var old=cols.some(function(c){return c.a.det<c.a.legs;});
-  return h+(old?'<div class="small" style="margin-top:6px">Le partite giocate prima di questo aggiornamento non hanno il dettaglio freccia per freccia: per quelle mancano bersagli, media per freccia, tripli e chance per singolo doppio.</div>':'');
+  return h;
 }
 
 var statSel=null,statMode="x01",statTgt=null;
@@ -1668,7 +1720,8 @@ function renderStats(){
     cells=[["Sessioni",sel.length],["Punti medi",sel.length?fmt(pts/sel.length,0):"—"],["Miglior punteggio",sel.length?best:"—"],["A segno",pct(b.on,dts)]];
     if(statTgt!==25)cells.push(["Tripli",pct(b.T,dts)]);
     cells.push(["Doppi",pct(b.D,dts)],["Singoli",pct(b.S,dts)],["Fuori",pct(b.miss,dts)]);
-    if(sel.length)extra='<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>';
+    if(sel.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+h100PerTable(sel,statTgt)+
+      '<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>';
     list=sel.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1],bb=hBreak(p.cnt,g.target);
       return '<div class="g"><span>'+dd(g)+' · sul '+tName(g.target)+'</span><span><b>'+p.pts+'</b> punti · '+pct(bb.on,p.darts)+'</span></div>';}).join("");
   }
