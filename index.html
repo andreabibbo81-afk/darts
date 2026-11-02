@@ -215,6 +215,21 @@ nav.tabs svg{display:block;margin:0 auto 4px}
 .pt td small{color:var(--mut);font-size:11px;margin-left:5px}
 .pt td.best{color:var(--ok);font-weight:800}
 .pt td.na{color:var(--mut)}
+.heat{display:block;width:100%;max-width:420px;margin:14px auto 6px}
+.hlist{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.hs{padding:12px 14px;border-top:1px solid var(--line)}
+.hs:first-child{border-top:0}
+.hh{display:flex;justify-content:space-between;align-items:baseline}
+.hh b{font-size:17px;font-weight:800}
+.hh span{font-size:17px;font-weight:800}
+.hh small{color:var(--mut);font-size:12px;font-weight:600;margin-left:6px}
+.hbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line);margin:8px 0 7px;gap:2px}
+.hp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;font-size:13px;color:var(--mut)}
+.hp span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.hp span b{margin-left:auto}
+.hp span.z{opacity:.45}
+.hp b{color:var(--txt);font-weight:700}
+.hp i{width:8px;height:8px;border-radius:2px;display:inline-block}
 .pt th:not(:first-child),.pt td:not(:first-child){min-width:84px}
 
 @media (orientation:landscape) and (max-height:860px){
@@ -1448,14 +1463,61 @@ function perKey(d,per){
   function p2(n){return (n<10?"0":"")+n;}
   function dm(x){return x.getDate()+"/"+(x.getMonth()+1);}
   var y=d.getFullYear(),m=d.getMonth(),day=d.getDate(),now=new Date().getFullYear();
-  if(per==="y")return {k:""+y,h:""+y};
-  if(per==="m")return {k:y+"-"+p2(m+1),h:d.toLocaleDateString("it-IT",{month:"short"})+"<small>"+y+"</small>"};
+  if(per==="y")return {k:""+y,h:""+y,t:""+y};
+  if(per==="m")return {k:y+"-"+p2(m+1),h:d.toLocaleDateString("it-IT",{month:"short"})+"<small>"+y+"</small>",t:d.toLocaleDateString("it-IT",{month:"short"})+" "+y};
   if(per==="w"){var mo=new Date(y,m,day-((d.getDay()+6)%7)),su=new Date(mo.getFullYear(),mo.getMonth(),mo.getDate()+6);
-    return {k:mo.getFullYear()+"-"+p2(mo.getMonth()+1)+"-"+p2(mo.getDate()),h:dm(mo)+"–"+dm(su)+"<small>settimana"+(mo.getFullYear()!==now?" "+mo.getFullYear():"")+"</small>"};}
-  return {k:y+"-"+p2(m+1)+"-"+p2(day),h:dm(d)+(y!==now?"/"+String(y).slice(2):"")+"<small>"+d.toLocaleDateString("it-IT",{weekday:"short"})+"</small>"};
+    return {k:mo.getFullYear()+"-"+p2(mo.getMonth()+1)+"-"+p2(mo.getDate()),h:dm(mo)+"–"+dm(su)+"<small>settimana"+(mo.getFullYear()!==now?" "+mo.getFullYear():"")+"</small>",t:dm(mo)+"–"+dm(su)};}
+  return {k:y+"-"+p2(m+1)+"-"+p2(day),h:dm(d)+(y!==now?"/"+String(y).slice(2):"")+"<small>"+d.toLocaleDateString("it-IT",{weekday:"short"})+"</small>",t:d.toLocaleDateString("it-IT",{weekday:"short"})+" "+dm(d)+(y!==now?"/"+String(y).slice(2):"")};
 }
 function bigPct(list){var t=0,d=0;list.forEach(function(gp){var p=gp[1];if(!p.tt)return;p.tt.forEach(function(tu){tu.z.forEach(function(z){d++;if(/^T(20|19|18|17)$/.test(z))t++;});});});
   return d?fmt(t/d*100)+'% <span style="font-size:14px;color:var(--mut)">'+t+' su '+d+'</span>':"—";}
+// ---- bersaglio: dove finiscono le frecce, per periodo ----
+var heatK=null;
+function zName(z){if(z==="MISS")return "Fuori";if(z==="BULL")return "Bull 25";if(z==="DBULL")return "Bull 50";
+  var n=parseInt(z.slice(1),10);if(z[0]==="T")return "Triplo "+n;if(z[0]==="D")return "Doppio "+n;return (/i$/.test(z)?"Singolo basso ":"Singolo alto ")+n;}
+function heatSvg(cnt,max){
+  var R={db:7,bull:16,tIn:99,tOut:107,dIn:162,dOut:170},h='';
+  function pt(r,a){a=(a-90)*Math.PI/180;return (r*Math.cos(a)).toFixed(2)+","+(r*Math.sin(a)).toFixed(2);}
+  function arc(r1,r2,a1,a2){return "M"+pt(r2,a1)+" A"+r2+","+r2+" 0 0 1 "+pt(r2,a2)+" L"+pt(r1,a2)+" A"+r1+","+r1+" 0 0 0 "+pt(r1,a1)+"Z";}
+  function fill(z){var c=cnt[z]||0;return c?'fill="#FFD400" fill-opacity="'+(0.18+0.82*c/max).toFixed(2)+'"':'fill="#0E2152"';}
+  h+='<circle r="200" fill="#081533"/>';
+  ORDER.forEach(function(n,i){var a1=i*18-9,a2=i*18+9;
+    [["S"+n+"i",R.bull,R.tIn],["T"+n,R.tIn,R.tOut],["S"+n+"o",R.tOut,R.dIn],["D"+n,R.dIn,R.dOut]].forEach(function(q){
+      h+='<path d="'+arc(q[1],q[2],a1,a2)+'" '+fill(q[0])+' stroke="#22397A" stroke-width="1"/>';});
+    var tp=pt(186,i*18).split(",");h+='<text x="'+tp[0]+'" y="'+(+tp[1]+5)+'" text-anchor="middle" font-size="15" font-weight="700" fill="#9DB0DA">'+n+'</text>';});
+  h+='<circle r="'+R.bull+'" '+fill("BULL")+' stroke="#22397A"/><circle r="'+R.db+'" '+fill("DBULL")+' stroke="#22397A"/>';
+  return '<svg class="heat" viewBox="-205 -205 410 410">'+h+'</svg>';
+}
+function heatSection(mine){
+  var groups={},order=[];
+  mine.forEach(function(gp){var p=gp[1];if(!p.tt)return;var pk=perKey(new Date(gp[0].date),sv.per);
+    if(!groups[pk.k]){groups[pk.k]={t:pk.t,cnt:{},n:0};order.push(pk.k);}
+    var G=groups[pk.k];p.tt.forEach(function(t){t.z.forEach(function(z){G.cnt[z]=(G.cnt[z]||0)+1;G.n++;});});});
+  if(!order.length)return "";
+  order.sort().reverse();order=order.slice(0,12);
+  if(order.indexOf(heatK)<0)heatK=order[0];
+  var G=groups[heatK],max=0;for(var z in G.cnt)if(z!=="MISS")max=Math.max(max,G.cnt[z]);
+  // raggruppa per settore: basso (singolo interno), triplo, alto (singolo esterno), doppio
+  var sec={};
+  for(var z in G.cnt){var c=G.cnt[z],k,part;
+    if(z==="MISS"){k="F";part=null;}else if(z==="BULL"||z==="DBULL"){k="B";part=z==="BULL"?"25":"50";}
+    else{k=parseInt(z.slice(1),10);part=z[0]==="T"?"t":z[0]==="D"?"d":/i$/.test(z)?"b":"a";}
+    sec[k]=sec[k]||{k:k,n:0,p:{}};sec[k].n+=c;if(part)sec[k].p[part]=(sec[k].p[part]||0)+c;}
+  var list=Object.keys(sec).map(function(k){return sec[k];}).sort(function(a,b){return b.n-a.n;});
+  function pc(c){return fmt(c/G.n*100)+"%";}
+  var COLS={b:"#7FA2FF",t:"#FF5A4E",a:"#3ECF8E",d:"#FFD400","25":"#3ECF8E","50":"#FF5A4E"};
+  var rows=list.map(function(x){
+    var name=x.k==="F"?"Fuori":x.k==="B"?"Bull":"Settore "+x.k,
+      parts=x.k==="F"?[]:x.k==="B"?[["25","25"],["50","50"]]:[["b","basso"],["t","triplo"],["a","alto"],["d","doppio"]];
+    return '<div class="hs"><div class="hh"><b>'+name+'</b><span>'+pc(x.n)+'<small>'+x.n+(x.n===1?' freccia':' frecce')+'</small></span></div>'+
+      (parts.length?'<div class="hbar">'+parts.map(function(q){var c=x.p[q[0]]||0;return c?'<i style="flex:'+c+';background:'+COLS[q[0]]+'"></i>':'';}).join("")+'</div>'+
+      '<div class="hp">'+parts.map(function(q){var c=x.p[q[0]]||0;return '<span'+(c?'':' class="z"')+'><i style="background:'+COLS[q[0]]+'"></i>'+q[1]+' <b>'+pc(c)+'</b></span>';}).join("")+'</div>':'')+'</div>';});
+  return '<div class="sect">Bersaglio · dove finiscono le frecce</div>'+
+    '<div class="chips">'+order.map(function(k){return '<button class="chip'+(k===heatK?" on":"")+'" data-hk="'+k+'">'+esc(groups[k].t)+'</button>';}).join("")+'</div>'+
+    heatSvg(G.cnt,max||1)+
+    '<div class="small" style="text-align:center;margin-bottom:10px">Più è giallo, più frecce sono finite lì · '+G.n+' frecce. Le percentuali sono sul totale delle frecce tirate.</div>'+
+    '<div class="hlist">'+rows.join("")+'</div>';
+}
 function avg3(x){return x[1]?[fmt(x[0]/x[1]*3),x[0]/x[1]*3]:null;}
 function topList(o,i,num){var l=Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1]||(num?b[0]-a[0]:0);});return l[i]?[esc(l[i][0])+"<small>"+l[i][1]+"×</small>",null]:null;}
 function perTable(mine,out){
@@ -1539,7 +1601,7 @@ function renderStats(){
       sv.out==="double"?["% chiusura",s.coPct==null?"—":fmt(s.coPct,0)+'% <span style="font-size:14px;color:var(--mut)">'+s.coH+' su '+s.coA+' frecce</span>']:["Frecce per leg",s.games?fmt(s.darts/s.games):"—"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
     var vb={};mine.forEach(function(gp){gp[0].players.forEach(function(q){var l=botLevel(q.name);if(l){vb[l]=vb[l]||[0,0];vb[l][1]++;if(gp[1].won)vb[l][0]++;}});});
     var lv=Object.keys(vb).sort(function(a,b){return a-b;});
-    if(mine.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+perTable(mine,sv.out);
+    if(mine.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+perTable(mine,sv.out)+heatSection(mine);
     if(lv.length)extra+='<div class="sect">Contro il bot · vinte su giocate</div><div class="dgrid">'+lv.map(function(l){return '<div><b>Liv. '+l+'</b><span>'+vb[l][0]+' su '+vb[l][1]+'</span></div>';}).join("")+'</div>';
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];var vs=g.players.filter(function(x){return x.name!==statSel;}).map(function(x){return x.name;}).join(", ");
       return '<div class="g"><span>'+dd(g)+' · '+g.start+(vs?' vs '+esc(vs):' solo')+(p.won?' · <b style="color:var(--ok)">vinta</b>':'')+'</span><span>media <b>'+fmt(p.darts?p.pts/p.darts*3:0)+'</b> · '+p.darts+' fr.</span></div>';}).join("");
@@ -1587,7 +1649,8 @@ $("sModes").addEventListener("click",function(e){var c=e.target.closest("[data-s
 $("sTargets").addEventListener("click",function(e){var c=e.target.closest("[data-st]");if(c){statTgt=+c.dataset.st;renderStats();}});
 $("sOut").addEventListener("click",function(e){var c=e.target.closest("[data-so]");if(c){sv.out=c.dataset.so;svSave();renderStats();}});
 $("sStart").addEventListener("click",function(e){var c=e.target.closest("[data-ss]");if(c){sv.start=+c.dataset.ss;svSave();renderStats();}});
-$("sExtra").addEventListener("click",function(e){var c=e.target.closest("[data-per]");if(c){sv.per=c.dataset.per;svSave();renderStats();}});
+$("sExtra").addEventListener("click",function(e){var c=e.target.closest("[data-per]");if(c){sv.per=c.dataset.per;heatK=null;svSave();renderStats();return;}
+  var h=e.target.closest("[data-hk]");if(h){heatK=h.dataset.hk;var y=$("vStats").scrollTop;renderStats();$("vStats").scrollTop=y;}});
 $("sCopy").onclick=function(){var t=JSON.stringify({players:players,games:games});
   if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("Dati copiati ✓");},function(){toast("Copia non riuscita");});};
 $("sImpBtn").onclick=function(){$("sImp").hidden=!$("sImp").hidden;};
