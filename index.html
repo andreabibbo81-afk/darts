@@ -1500,7 +1500,7 @@ function heatSection(mine){
   mine.forEach(function(gp){var p=gp[1];if(!p.tt)return;var pk=perKey(new Date(gp[0].date),sv.per);
     if(!groups[pk.k]){groups[pk.k]={t:pk.t,cnt:{},n:0};order.push(pk.k);}
     var G=groups[pk.k];p.tt.forEach(function(t){t.z.forEach(function(z){G.cnt[z]=(G.cnt[z]||0)+1;G.n++;});});});
-  if(!order.length)return "";
+  if(!order.length)return '<div class="sect">Bersaglio · dove finiscono le frecce</div><div class="card small">Il bersaglio compare dopo la prima partita a 501 giocata con questa versione dell\'app (salva ogni freccia). Gioca e finisci una partita con la chiusura selezionata qui sopra: lo trovi qui.</div>';
   order.sort().reverse();order=order.slice(0,12);
   if(order.indexOf(heatK)<0)heatK=order[0];
   var G=groups[heatK],max=0;for(var z in G.cnt)if(z!=="MISS")max=Math.max(max,G.cnt[z]);
