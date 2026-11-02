@@ -1573,10 +1573,11 @@ function heatSection(mine){
 // ---- 100 frecce: statistiche per periodo (giorno, settimana, mese, anno) sul numero scelto ----
 function h100Agg(sel,target){
   var a={n:0,darts:0,pts:0,on:0,T:0,D:0,S:0,M:0,det:0,p1:0,p2:0,mx:{pts:null,T:null,D:null,S:null,p1:null,p2:null},
-    run:{on:0,T:0,D:0,S:0,M:0},vol:[0,0,0,0,0,0,0,0,0,0]};
+    run:{on:0,T:0,D:0,S:0,M:0},vol:[0,0,0,0,0,0,0,0,0,0],oth:{},miss:0};
   function mx(k,v){if(a.mx[k]==null||v>a.mx[k])a.mx[k]=v;}
   sel.forEach(function(gp){var p=gp[1],b=hBreak(p.cnt||{},target);
-    a.n++;a.darts+=p.darts;a.pts+=p.pts;a.on+=b.on;a.T+=b.T;a.D+=b.D;a.S+=b.S;a.M+=p.darts-b.on;
+    a.n++;a.darts+=p.darts;a.pts+=p.pts;a.on+=b.on;a.T+=b.T;a.D+=b.D;a.S+=b.S;a.M+=p.darts-b.on;a.miss+=b.miss;
+    for(var ok in b.oth)a.oth[ok]=(a.oth[ok]||0)+b.oth[ok];
     mx("pts",p.pts);mx("T",b.T);mx("D",b.D);mx("S",b.S);
     if(!p.tz)return;
     a.det++;var k=0,h1=0,h2=0,cur={on:0,T:0,D:0,S:0,M:0};
@@ -1610,6 +1611,11 @@ function h100PerTable(sel,target){
     ["Punti prime 50",D(M("p1")),1],["Punti seconde 50",D(M("p2")),1]])]);
   function R(k,b){return [k==="on"?"A segno":k==="T"?"Tripli":k==="D"?"Doppi":k==="S"?"Singoli":"Mancati",D(function(a){return [a.run[k],a.run[k]];}),b];}
   secs.push(["Di fila (serie più lunga)",[R("on",1)].concat(bull?[]:[R("T",1)]).concat([R("D",1),R("S",1),R("M",-1)])]);
+  // tutti gli altri numeri colpiti (triplo, singolo, doppio separati), dal più colpito
+  var tot={};cols.forEach(function(c){for(var k in c.a.oth)tot[k]=(tot[k]||0)+c.a.oth[k];});
+  var ks=Object.keys(tot).sort(function(x,y){return tot[y]-tot[x];});
+  function O(k){return function(a){var c=k==="Fuori"?a.miss:(a.oth[k]||0);return a.darts?[c+"<small>"+fmt(c/a.darts*100)+"%</small>",null]:null;};}
+  secs.push(["Altri numeri colpiti",ks.map(function(k){return [k,O(k)];}).concat([["Fuori",O("Fuori")]])]);
   var old=cols.some(function(c){return c.a.det<c.a.n;});
   return ptHtml(cols,secs)+(old?'<div class="small" style="margin-top:6px">Le sessioni giocate prima di questo aggiornamento non hanno l\'ordine delle frecce: per quelle mancano i punti delle prime/seconde 50 e le serie di fila.</div>':'');
 }
