@@ -255,10 +255,10 @@ html.nogap .gstat>*+*{margin-left:22px}
   .gwrap:not(.online) .cpanel{grid-row:1}
   .gwrap:not(.online) .gact{grid-column:1/-1;grid-row:2;grid-template-columns:1fr 1fr 1.6fr}
   .gwrap:not(.online) .gact .go{grid-column:auto}
-  .cpanel{grid-template-columns:auto 1fr;grid-template-rows:auto auto auto auto 1fr;grid-template-areas:"name hint" "big hint" "big slots" "big tt" "big stat";column-gap:34px;row-gap:8px;align-content:center}
+  .cpanel{grid-template-columns:auto 1fr;grid-template-rows:auto auto auto auto auto;grid-template-areas:"name hint" "big hint" "big slots" "big tt" "big stat";column-gap:34px;row-gap:8px;align-content:center}
   .cname{font-size:20px;align-self:end}
-  .big{font-size:min(50vh,230px);align-self:start}
-  .big.l4{font-size:min(36vh,165px)}
+  .big{font-size:min(50vh,22vw,230px);align-self:start}
+  .big.l4{font-size:min(36vh,16vw,165px)}
   .hint{align-self:center;padding:0;min-height:48px}
   .slots{width:100%;max-width:none}
   .slot{height:72px}
@@ -267,6 +267,50 @@ html.nogap .gstat>*+*{margin-left:22px}
   .gstat b{font-size:26px}
   .gact .btn{padding:13px 8px;font-size:18px}
   .ps .pv{font-size:38px}
+}
+/* iPad e tablet: tutto in scala più grande */
+@media (min-width:700px) and (min-height:600px){
+  #vGame.view{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
+  #vGame .top{min-height:56px}
+  #vGame .back,#vGame .kicker{font-size:19px}
+  #vGame .pill{font-size:18px;padding:10px 18px}
+  .toast{font-size:20px;padding:14px 22px}
+  .cname{font-size:28px}
+  .big{font-size:min(56vw,30vh,400px)}
+  .big.l4{font-size:min(42vw,23vh,300px)}
+  .slots{max-width:none}
+  .slot{height:116px}
+  .slot b{font-size:58px}
+  .slot i{font-size:19px}
+  .tt{font-size:30px;min-height:38px;margin-top:14px}
+  .cot{font-size:22px}
+  .co{font-size:44px;padding:6px 16px}
+  .msg{font-size:30px}
+  .hint{min-height:64px;margin-top:12px}
+  .gstat{font-size:22px;gap:34px;margin-top:8px}
+  .gstat b{font-size:36px}
+  html.nogap .gstat>*+*{margin-left:34px}
+  .gact{gap:14px}
+  .gact .btn{font-size:26px;padding:26px 10px;border-radius:16px}
+  .ps{padding:12px 16px}
+  .ps .pn{font-size:20px}
+  .ps .pv{font-size:66px}
+  .ps .pa{font-size:18px}
+  .scores{gap:12px}
+}
+@media (orientation:landscape) and (min-width:700px) and (min-height:600px){
+  .gwrap:not(.online){grid-template-columns:minmax(220px,22%) minmax(0,1fr);gap:14px 30px}
+  .cpanel{grid-template-columns:auto minmax(0,1fr);column-gap:36px;row-gap:14px}
+  .gstat{flex-wrap:wrap;gap:6px 28px}
+  .big{font-size:min(52vh,19vw,420px)}
+  .big.l4{font-size:min(38vh,16vw,300px)}
+  .solo .big{font-size:min(52vh,32vw,420px)}
+  .solo .big.l4{font-size:min(40vh,24vw,320px)}
+  .slot{height:120px}
+  .tt{font-size:34px}
+  .gstat{font-size:24px}
+  .gstat b{font-size:40px}
+  .gact .btn{padding:24px 10px}
 }
 </style>
 </head>
