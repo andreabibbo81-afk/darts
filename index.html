@@ -512,9 +512,19 @@ function val(zi){if(zi.bull)return zi.dbl||settings.fatBull?50:25;return zi.seg*
 
 /* ================= suoni (sintetizzati, stile cabinet) ================= */
 var ctx=null,master=null;
+var IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+function mGain(){return settings.vol/100*(IOS?0.8:1.5);} // iPad/iPhone: altoparlanti piccoli, volume più basso per non gracchiare
 function ac(){
-  if(!ctx){var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ctx=new C();master=ctx.createGain();master.gain.value=settings.vol/100*1.5;
-    var comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);}
+  if(!ctx){var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+    ctx=new C();
+    if(IOS){ // iOS a volte crea l'audio con la frequenza di campionamento sbagliata e il suono esce distorto: si ricrea una volta
+      try{var sb=ctx.createBufferSource();sb.buffer=ctx.createBuffer(1,1,22050);sb.connect(ctx.destination);sb.start(0);if(ctx.close)ctx.close();}catch(e){}
+      ctx=new C();
+    }
+    master=ctx.createGain();master.gain.value=mGain();
+    var comp=ctx.createDynamicsCompressor();
+    if(IOS){comp.threshold.value=-14;comp.knee.value=8;comp.ratio.value=8;comp.attack.value=0.002;comp.release.value=0.12;}
+    master.connect(comp);comp.connect(ctx.destination);}
   if(ctx.state==="suspended")ctx.resume();return ctx;
 }
 function tone(f,t,d,type,g,f2,vib){
@@ -1502,7 +1512,7 @@ function renderSet(){
   $("setBT").textContent=btSupport()||"";
   renderSyncBox();
 }
-$("setVol").oninput=function(){settings.vol=+this.value;$("setVolV").textContent=this.value+"%";if(master)master.gain.value=settings.vol/100*1.5;saveSettings();};
+$("setVol").oninput=function(){settings.vol=+this.value;$("setVolV").textContent=this.value+"%";if(master)master.gain.value=mGain();saveSettings();};
 document.querySelectorAll("[data-set=fatBull] button").forEach(function(b){b.onclick=function(){settings.fatBull=b.dataset.v==="1";saveSettings();buildSegs();renderSet();};});
 document.querySelectorAll("[data-sw]").forEach(function(b){b.onclick=function(){settings[b.dataset.sw]=!settings[b.dataset.sw];saveSettings();renderSet();if(b.dataset.sw==="voice")say("Voce attiva");if(b.dataset.sw==="ledOff"&&settings.ledOff){ledOff();toast(bt.w?"Luci spente":"Collega la board per spegnere le luci");}};});
 $("setConnBtn").onclick=function(){if(bt.state==="on"&&bt.dev){manualOff=true;bt.dev.gatt.disconnect();}else connect();};
