@@ -584,6 +584,8 @@ function say(txt){
   try{var u=new SpeechSynthesisUtterance(txt);u.lang="it-IT";u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
 }
 function vib(p){if(settings.vibe){try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}}}
+// tripli e bull hanno sempre il loro suono, in tutti i giochi
+function fxHit(zi){if(zi.trp){playTriple(zi.seg);return true;}if(zi.id==="BULL"||zi.id==="DBULL"){play(hitSound(zi));return true;}return false;}
 function hitSound(zi){if(zi.id==="MISS")return"out";if(zi.id==="DBULL")return"dbull";if(zi.id==="BULL")return"bull";if(zi.trp)return"triple";if(zi.dbl)return"double";return"single";}
 
 /* ================= chiusure consigliate ================= */
@@ -846,7 +848,7 @@ function dartOther(z){
     if(z!=="MISS"&&zi.seg===num){hit=true;v=zi.bull?(zi.dbl?2:1):zi.mult;}
     p.cnt[z]=(p.cnt[z]||0)+1;p.score+=v;
     t.darts.push({z:z,v:v,hit:hit});
-    if(hit&&zi.trp)playTriple(zi.seg);else play(hit?hitSound(zi):"out");
+    if(!fxHit(zi))play(hit?hitSound(zi):"out");
     if(p.n>=100)p.done=true;
     if(t.darts.length===3||p.done)endVolley();
     return;
@@ -855,8 +857,8 @@ function dartOther(z){
     num=RTC[p.idx];hit=num===25?!!zi.bull:(zi.seg===num&&!zi.bull);
     p.per[p.idx]=(p.per[p.idx]||0)+1;
     t.darts.push({z:z,v:hit?1:0,hit:hit,tg:num});
-    if(hit){p.hits++;p.idx++;play("coin");if(p.idx>=RTC.length){p.done=true;g.winner=g.cur;say(p.name+" ha finito il giro!");endGame();return;}}
-    else play(z==="MISS"?"out":"single");
+    if(hit){p.hits++;p.idx++;if(!fxHit(zi))play("coin");if(p.idx>=RTC.length){p.done=true;g.winner=g.cur;say(p.name+" ha finito il giro!");endGame();return;}}
+    else if(!fxHit(zi))play(z==="MISS"?"out":"single");
     if(t.darts.length===3)endVolley();
     return;
   }
@@ -864,8 +866,8 @@ function dartOther(z){
     num=B27[p.idx];var dv=num===25?50:num*2;
     hit=num===25?zi.id==="DBULL":(!!zi.dbl&&!zi.bull&&zi.seg===num);
     t.darts.push({z:z,v:hit?dv:0,hit:hit,tg:num});
-    if(hit){p.score+=dv;p.hits++;p.per[p.idx]=(p.per[p.idx]||0)+1;play("coin");}
-    else play(z==="MISS"?"out":"single");
+    if(hit){p.score+=dv;p.hits++;p.per[p.idx]=(p.per[p.idx]||0)+1;if(!fxHit(zi))play("coin");}
+    else if(!fxHit(zi))play(z==="MISS"?"out":"single");
     if(t.darts.length===3)endVolley();
   }
 }
