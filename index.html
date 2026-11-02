@@ -114,6 +114,13 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 @keyframes pu2{to{background:#B89A00}}
 .gstat{display:flex;justify-content:center;gap:18px;font-size:12px;color:var(--mut);margin-top:4px}
 .gstat b{color:var(--txt);font-size:14px}
+.h1c{border-collapse:collapse;font-variant-numeric:tabular-nums;margin:0 auto;width:100%;max-width:560px}
+.h1c th,.h1c td{padding:3px 4px;text-align:center;white-space:nowrap}
+.h1c th{text-align:left;font-weight:600;color:var(--mut);font-size:1em}
+.h1c tr.hd td{font-size:.85em;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)}
+.h1c tr.now td{color:var(--txt);font-weight:800;font-size:1.75em;line-height:1.05;font-family:"Barlow Condensed",sans-serif}
+.h1c tr.best td{color:var(--ok);font-weight:800;font-size:1.75em;line-height:1.05;font-family:"Barlow Condensed",sans-serif}
+.h1c tr.best{border-top:1px solid var(--line)}
 
 /* overlay */
 .ov{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(5,12,32,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + var(--st)) 16px calc(16px + var(--sb));z-index:10}
@@ -1015,6 +1022,21 @@ function todayAvg(p,s){
     g.players.forEach(function(q){if(q.name===p.name){pts+=q.pts;d+=q.darts;}});});
   return d?pts/d*3:0;
 }
+// 100 frecce: confronto con il tuo migliore sullo stesso numero (come My Darts Training)
+function h100Best(name,target){
+  var best=null;
+  games.forEach(function(g){if(gType(g)!=="h100"||g.target!==target||(game&&g.id===game.savedId))return;
+    g.players.forEach(function(q){if(q.name!==name||q.darts<100)return;var b=hBreak(q.cnt||{},target),r={pts:q.pts,S:b.S,D:b.D,T:b.T,M:q.darts-b.on};
+      if(!best||r.pts>best.pts||(r.pts===best.pts&&r.M<best.M))best=r;});});
+  return best;
+}
+function h100Cmp(p,g){
+  var b=hBreak(p.cnt,g.target),now={pts:p.score,S:b.S,D:b.D,T:b.T,M:p.n-b.on},best=h100Best(p.name,g.target),bull=g.target===25;
+  var cols=[["Punti","pts"],["Singoli","S"],["Doppi","D"]].concat(bull?[]:[["Tripli","T"]]).concat([["Mancati","M"]]);
+  function row(lab,o,cls){return '<tr class="'+cls+'"><th>'+lab+'</th>'+cols.map(function(c){return '<td>'+(o?o[c[1]]:'—')+'</td>';}).join("")+'</tr>';}
+  return '<table class="h1c"><tr class="hd"><th></th>'+cols.map(function(c){return '<td>'+c[0]+'</td>';}).join("")+'</tr>'+
+    row("Adesso",now,"now")+row("Migliore",best,"best")+'</table>';
+}
 function pStats(p){
   var pts=game.start-p.score,d=0,first=0,fd=0;
   p.turns.forEach(function(t,i){d+=t.darts.length;if(i<3){fd+=t.darts.length;first+=t.bust?0:(t.start-(i<p.turns.length-1?p.turns[i+1].start:p.score));}});
@@ -1082,7 +1104,7 @@ function renderGame(anim){
   $("gHint").innerHTML=h;
   var st="";
   if(ty==="x01"){var s=pStats(p);st='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Oggi <b>'+fmt(todayAvg(p,s))+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';}
-  else if(ty==="h100"){var b=hBreak(p.cnt,g.target);st=(g.target===25?'':'<span>T <b>'+b.T+'</b></span>')+'<span>D <b>'+b.D+'</b></span><span>S <b>'+b.S+'</b></span><span>A segno <b>'+pct(b.on,p.n)+'</b></span>';}
+  else if(ty==="h100")st=h100Cmp(p,g);
   else if(ty==="rtc")st='<span>A segno <b>'+pct(p.hits,p.n)+'</b></span>';
   else st='<span>Doppi presi <b>'+p.hits+'</b> su <b>'+p.n+'</b> frecce</span>';
   $("gStat").innerHTML=st;
