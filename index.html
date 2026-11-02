@@ -1402,8 +1402,8 @@ var sv=Object.assign({out:null,per:"d",start:null},load("gb_statview",{}));
 function svSave(){store("gb_statview",sv);}
 function oppKind(g,p){if(g.players.length<2)return "solo";return g.players.some(function(q){return q!==p&&botLevel(q.name);})?"bot":"amici";}
 function tgLab(z){if(z==="BULL")return "25";if(z==="DBULL")return "Bull";var m=/^([SDT])(\d+)/.exec(z||"");return m?m[1]+m[2]:null;}
-function scBin(s){return s<=0?0:s<30?1:s<50?2:s<70?3:s<90?4:s<110?5:s<130?6:s<160?7:s<180?8:9;}
-var BINS=["Nessun punto","1–29","30+","50+","70+","90+","110+","130+","160+","180"];
+function scBin(s){return s<=0?0:s<30?1:s<=45?2:s<=60?3:s<=85?4:s<=100?5:s<=120?6:s<180?7:8;}
+var BINS=["0","1–29","30–45","46–60","61–85","86–100","101–120","121–179","180"];
 // una partita di un giocatore → leg con volée normalizzate (anche per le partite salvate prima del dettaglio freccia per freccia)
 function legOf(g,p){
   var L={won:!!p.won,co:p.won?(p.co||0):0,opp:oppKind(g,p),turns:[],det:!!p.tt,coA:0,coH:0,chk:{}},dbl=g.outRule==="double";
@@ -1425,7 +1425,7 @@ function legOf(g,p){
 function x01Agg(legs){
   var a={legs:legs.length,darts:0,pts:0,won:0,best:null,bestAvg:null,hi:0,coSum:0,coN:0,coHi:0,coH:0,coA:0,chk:{},
     first:{3:[0,0],4:[0,0],5:[0,0]},until:{170:[0,0],100:[0,0]},rnd:[],opp:{solo:[0,0],bot:[0,0],amici:[0,0]},
-    pos:[[0,0],[0,0],[0,0]],big:{20:[0,0,0],19:[0,0,0],18:[0,0,0],17:[0,0,0]},bins:[0,0,0,0,0,0,0,0,0,0],nT:0,sc:{},tg:{},det:0};
+    pos:[[0,0],[0,0],[0,0]],big:{20:[0,0,0],19:[0,0,0],18:[0,0,0],17:[0,0,0]},bins:[0,0,0,0,0,0,0,0,0],nT:0,sc:{},tg:{},det:0};
   legs.forEach(function(L){
     a.darts+=L.darts;a.pts+=L.pts;a.opp[L.opp][0]+=L.pts;a.opp[L.opp][1]+=L.darts;
     if(L.won){a.won++;if(a.best==null||L.darts<a.best)a.best=L.darts;a.coSum+=L.co;a.coN++;a.coHi=Math.max(a.coHi,L.co);}
@@ -1468,16 +1468,10 @@ function perTable(mine,out){
     ["Leg",function(a){return [a.legs,null];}],
     ["Frecce",function(a){return [a.darts,null];}],
     ["Media 3 frecce",function(a){return avg3([a.pts,a.darts]);},1],
-    ["Prime 9 frecce",function(a){return avg3(a.first[3]);},1],
-    ["Prime 12 frecce",function(a){return avg3(a.first[4]);},1],
-    ["Prime 15 frecce",function(a){return avg3(a.first[5]);},1],
     ["Frecce per leg",function(a){return a.legs?[fmt(a.darts/a.legs),a.darts/a.legs]:null;},-1],
     ["Media da solo",function(a){return avg3(a.opp.solo);},1],
     ["Media contro bot",function(a){return avg3(a.opp.bot);},1],
     ["Media contro amici",function(a){return avg3(a.opp.amici);},1]]]);
-  secs.push(["Media fino a quando restano",[
-    ["170",function(a){return avg3(a.until[170]);},1],
-    ["100",function(a){return avg3(a.until[100]);},1]]]);
   var co=[["Media chiusura",function(a){return a.coN?[fmt(a.coSum/a.coN),a.coSum/a.coN]:null;},1],
     ["Chiusura più alta",function(a){return a.coN?[a.coHi,a.coHi]:null;},1]];
   if(dbl)co.push(["Doppi",function(a){return a.coA?[a.coH+"/"+a.coA,null]:null;}],
