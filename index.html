@@ -302,6 +302,18 @@ html.nogap .gstat>*+*{margin-left:22px}
   .gact .btn{padding:13px 8px;font-size:18px}
   .ps .pv{font-size:38px}
 }
+/* telefono in orizzontale (schermo basso): tabella "Adesso / Migliore" più compatta */
+@media (orientation:landscape) and (max-height:520px){
+  .cpanel{row-gap:5px}
+  .hint{min-height:38px}
+  .slot{height:58px}
+  .slot b{font-size:30px}
+  .tt{font-size:20px;min-height:0}
+  .h1c th,.h1c td{padding:0 6px}
+  .h1c th{font-size:.85em}
+  .h1c tr.hd td{font-size:.68em}
+  .h1c tr.now td,.h1c tr.best td{font-size:1.4em;line-height:1.1}
+}
 /* iPad e tablet: tutto in scala più grande */
 @media (min-width:700px) and (min-height:600px){
   #vGame.view{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
