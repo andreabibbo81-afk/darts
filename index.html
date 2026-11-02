@@ -513,7 +513,7 @@ html.nogap .gstat>*+*{margin-left:22px}
   <div class="small" id="ovHint" style="margin-top:8px">Tocca il punto colpito</div>
 </div>
 <div class="ov" id="ovSum" hidden><div class="sum" id="sumBox"></div></div>
-<div class="ov" id="ovClear" hidden><div class="sum"><h3>Cancello tutte le partite?</h3><p class="small">Si cancellano tutte le partite salvate di tutti i giochi e di tutti i giocatori, anche sugli altri dispositivi collegati con il codice. I nomi dei giocatori restano. Non si può annullare: se vuoi tenerne una copia, prima premi «Copia i dati».</p><div class="row"><button class="btn" id="cNo">Annulla</button><button class="btn pri" id="cYes" style="background:var(--red);border-color:var(--red);color:#fff">Cancella tutto</button></div></div></div>
+<div class="ov" id="ovClear" hidden><div class="sum"><h3 id="cTitle">Cancello le partite?</h3><p class="small" id="cText"></p><div class="row"><button class="btn" id="cNo">Annulla</button><button class="btn pri" id="cYes" style="background:var(--red);border-color:var(--red);color:#fff">Cancella tutto</button></div></div></div>
 <div class="ov" id="ovQuit" hidden><div class="sum"><h3>Esci?</h3><p class="small">La partita in corso non verrà salvata nelle statistiche.</p><div class="row"><button class="btn" id="qNo">Continua</button><button class="btn pri" id="qYes">Esci</button></div></div></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -1131,13 +1131,18 @@ $("gUndo").onclick=undo;$("mUndo").onclick=undo;
 $("gNext").onclick=function(){if(game&&game.over)showSummary();else if(notReady())startGo();else nextPlayer();};
 $("gQuit").onclick=function(){if(!game||game.over||!undoStack.length){quit();return;}$("ovQuit").hidden=false;};
 $("qNo").onclick=function(){$("ovQuit").hidden=true;};
-$("sClear").onclick=function(){$("ovClear").hidden=false;};
+$("sClear").onclick=function(){var nm=MODE_NAMES[statMode],n=games.filter(function(g){return gType(g)===statMode;}).length;
+  if(!n){toast("Nessuna partita di "+nm+" da cancellare");return;}
+  $("cTitle").textContent="Cancello le partite di "+nm+"?";
+  $("cText").textContent="Si cancellano le "+n+" partite salvate di "+nm+" (di tutti i giocatori), anche sugli altri dispositivi collegati con il codice. Gli altri giochi restano come sono. Non si può annullare: se vuoi tenerne una copia, prima premi «Copia i dati».";
+  $("ovClear").hidden=false;};
 $("cNo").onclick=function(){$("ovClear").hidden=true;};
 $("cYes").onclick=function(){
   $("ovClear").hidden=true;
-  games.forEach(function(g){if(!isDel(g.id))deleted.push(g.id);});store("gb_deleted",deleted);
-  var n=games.length;games=[];store("gb_games",games);heatK=null;
-  renderStats();toast(n+" partite cancellate: si riparte da zero");syncNow(true);
+  var nm=MODE_NAMES[statMode],del=games.filter(function(g){return gType(g)===statMode;});
+  del.forEach(function(g){if(!isDel(g.id))deleted.push(g.id);});store("gb_deleted",deleted);
+  games=games.filter(function(g){return gType(g)!==statMode;});store("gb_games",games);heatK=null;
+  renderStats();toast(del.length+" partite di "+nm+" cancellate");syncNow(true);
 };
 $("qYes").onclick=function(){$("ovQuit").hidden=true;quit();};
 function quit(){clearTimeout(botT);botBoard(false);onlineStop();game=null;$("ovSum").hidden=true;show("vHome");}
@@ -1689,6 +1694,7 @@ function renderStats(){
   var mine=mineOf(statSel,statMode),extra="",list="",cells=[];
   $("sTgtWrap").hidden=statMode!=="h100";
   $("sX01").hidden=statMode!=="x01";
+  $("sClear").textContent="Cancella le partite di "+MODE_NAMES[statMode];
   var none='<div class="small">Ancora nessuna partita conclusa.</div>';
   if(statMode==="x01"){
     if(!sv.out||!OUT_NAMES[sv.out])sv.out=mine.length?mine[mine.length-1][0].outRule||"double":"double";
