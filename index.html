@@ -1425,13 +1425,13 @@ function legOf(g,p){
 function x01Agg(legs){
   var a={legs:legs.length,darts:0,pts:0,won:0,best:null,bestAvg:null,hi:0,coSum:0,coN:0,coHi:0,coH:0,coA:0,chk:{},
     first:{3:[0,0],4:[0,0],5:[0,0]},until:{170:[0,0],100:[0,0]},rnd:[],opp:{solo:[0,0],bot:[0,0],amici:[0,0]},
-    pos:[[0,0],[0,0],[0,0]],big:{20:[0,0,0],19:[0,0,0],18:[0,0,0],17:[0,0,0]},bins:[0,0,0,0,0,0,0,0,0],nT:0,sc:{},tg:{},det:0};
+    pos:[[0,0],[0,0],[0,0]],big:{20:[0,0,0],19:[0,0,0],18:[0,0,0],17:[0,0,0]},bins:[0,0,0,0,0,0,0,0,0],nT:0,sc:{},tg:{},det:0,detD:0};
   legs.forEach(function(L){
     a.darts+=L.darts;a.pts+=L.pts;a.opp[L.opp][0]+=L.pts;a.opp[L.opp][1]+=L.darts;
     if(L.won){a.won++;if(a.best==null||L.darts<a.best)a.best=L.darts;a.coSum+=L.co;a.coN++;a.coHi=Math.max(a.coHi,L.co);}
     if(L.darts){var la=L.pts/L.darts*3;if(a.bestAvg==null||la>a.bestAvg)a.bestAvg=la;}
     a.coH+=L.coH;a.coA+=L.coA;for(var k in L.chk){a.chk[k]=a.chk[k]||[0,0];a.chk[k][0]+=L.chk[k][0];a.chk[k][1]+=L.chk[k][1];}
-    if(L.det)a.det++;
+    if(L.det){a.det++;a.detD+=L.darts;}
     L.turns.forEach(function(t,i){
       a.hi=Math.max(a.hi,t.sc);a.nT++;a.bins[scBin(t.sc)]++;a.sc[t.sc]=(a.sc[t.sc]||0)+1;
       [3,4,5].forEach(function(n){if(i<n){a.first[n][0]+=t.sc;a.first[n][1]+=t.n;}});
@@ -1454,6 +1454,8 @@ function perKey(d,per){
     return {k:mo.getFullYear()+"-"+p2(mo.getMonth()+1)+"-"+p2(mo.getDate()),h:dm(mo)+"–"+dm(su)+"<small>settimana"+(mo.getFullYear()!==now?" "+mo.getFullYear():"")+"</small>"};}
   return {k:y+"-"+p2(m+1)+"-"+p2(day),h:dm(d)+(y!==now?"/"+String(y).slice(2):"")+"<small>"+d.toLocaleDateString("it-IT",{weekday:"short"})+"</small>"};
 }
+function bigPct(list){var t=0,d=0;list.forEach(function(gp){var p=gp[1];if(!p.tt)return;p.tt.forEach(function(tu){tu.z.forEach(function(z){d++;if(/^T(20|19|18|17)$/.test(z))t++;});});});
+  return d?fmt(t/d*100)+'% <span style="font-size:14px;color:var(--mut)">'+t+' su '+d+'</span>':"—";}
 function avg3(x){return x[1]?[fmt(x[0]/x[1]*3),x[0]/x[1]*3]:null;}
 function topList(o,i,num){var l=Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1]||(num?b[0]-a[0]:0);});return l[i]?[esc(l[i][0])+"<small>"+l[i][1]+"×</small>",null]:null;}
 function perTable(mine,out){
@@ -1480,7 +1482,8 @@ function perTable(mine,out){
     ["Punteggio più alto",function(a){return a.nT?[a.hi,a.hi]:null;},1]]]);
   secs.push(["Media per freccia",[0,1,2].map(function(j){return [(j+1)+"ª freccia",D(function(a){var x=a.pos[j];return x[1]?[fmt(x[0]/x[1]),x[0]/x[1]]:null;}),1];})]);
   secs.push(["Tripli grandi<small style=\"text-transform:none;letter-spacing:0\"> · totale (1ª·2ª·3ª)</small>",[20,19,18,17].map(function(n){
-    return ["T"+n,D(function(a){var b=a.big[n],t=b[0]+b[1]+b[2];return [t+"<small>"+b.join("·")+"</small>",t];}),1];})]);
+    return ["T"+n,D(function(a){var b=a.big[n],t=b[0]+b[1]+b[2];return [t+"<small>"+b.join("·")+"</small>",t];}),1];}).concat([
+    ["% tripli (20–17)",D(function(a){var t=0;[20,19,18,17].forEach(function(n){t+=a.big[n][0]+a.big[n][1]+a.big[n][2];});return a.detD?[fmt(t/a.detD*100)+"%<small>"+t+"/"+a.detD+"</small>",t/a.detD]:null;}),1]])]);
   var rr=[];for(var i=0;i<10;i++)(function(i){rr.push(["Volée "+(i+1),function(a){var x=a.rnd[i];return x&&x[1]?[fmt(x[0]/x[1]),x[0]/x[1]]:null;},1]);})(i);
   secs.push(["Media per volée",rr]);
   secs.push(["Volée per punteggio · %",BINS.map(function(lb,i){return [lb,function(a){return a.nT?[fmt(a.bins[i]/a.nT*100)+"%",null]:null;}];})]);
@@ -1532,7 +1535,7 @@ function renderStats(){
     var stTxt=starts.length?sv.start:(MODE_NAMES.x01);
     $("sTitle").textContent=stTxt+" · "+OUT_NAMES[sv.out]+" · tutte le partite";
     var s=statsFor(statSel,mine);
-    cells=[["Media 3 frecce",fmt(s.avg)],["Prime 9",fmt(s.f9)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
+    cells=[["Media 3 frecce",fmt(s.avg)],["% tripli 20–17",bigPct(mine)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
       sv.out==="double"?["% chiusura",s.coPct==null?"—":fmt(s.coPct,0)+'% <span style="font-size:14px;color:var(--mut)">'+s.coH+' su '+s.coA+' frecce</span>']:["Frecce per leg",s.games?fmt(s.darts/s.games):"—"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
     var vb={};mine.forEach(function(gp){gp[0].players.forEach(function(q){var l=botLevel(q.name);if(l){vb[l]=vb[l]||[0,0];vb[l][1]++;if(gp[1].won)vb[l][0]++;}});});
     var lv=Object.keys(vb).sort(function(a,b){return a-b;});
