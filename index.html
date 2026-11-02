@@ -1605,8 +1605,6 @@ function h100PerTable(sel,target){
     ["Doppi",P(function(a){return a.D;}),1],["Singoli",P(function(a){return a.S;}),1],["Mancati",P(function(a){return a.M;}),-1]])]);
   secs.push(["Frecce",[["Tirate",function(a){return [a.darts,null];}],["A segno",N(function(a){return a.on;}),1]].concat(bull?[]:[["Tripli",N(function(a){return a.T;}),1]]).concat([
     ["Doppi",N(function(a){return a.D;}),1],["Singoli",N(function(a){return a.S;}),1],["Mancati",N(function(a){return a.M;}),-1]])]);
-  secs.push(["Media punti",[["100 frecce",avg(function(a){return a.pts;}),1],
-    ["Prime 50",D(function(a){return [fmt(a.p1/a.det),a.p1/a.det];}),1],["Seconde 50",D(function(a){return [fmt(a.p2/a.det),a.p2/a.det];}),1]]]);
   function M(k){return function(a){return a.mx[k]!=null?[a.mx[k],a.mx[k]]:null;};}
   secs.push(["Massimo in una sessione",[["Punti",M("pts"),1]].concat(bull?[]:[["Tripli",M("T"),1]]).concat([["Doppi",M("D"),1],["Singoli",M("S"),1],
     ["Punti prime 50",D(M("p1")),1],["Punti seconde 50",D(M("p2")),1]])]);
