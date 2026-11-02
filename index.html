@@ -228,6 +228,46 @@ nav.tabs svg{display:block;margin:0 auto 4px}
   .ov svg{width:min(70vh,60vw)}
 }
 @media (min-width:700px){.view{padding-left:max(20px,calc(50vw - 330px));padding-right:max(20px,calc(50vw - 330px))}}
+/* ---- partita: scritte più grandi (v2) ---- */
+.cname{font-size:18px}
+.slots{max-width:540px}
+.slot{height:76px}
+.slot b{font-size:36px}
+.slot i{font-size:13px}
+.tt{font-size:20px;min-height:26px}
+.cot{font-size:15px}
+.co{font-size:28px;padding:4px 12px}
+.msg{font-size:20px}
+.gstat{font-size:15px;gap:22px}
+.gstat b{font-size:22px}
+.gact .btn{font-size:17px;padding:18px 8px}
+.big{font-size:min(46vw,28vh,250px)}
+.big.l4{font-size:min(34vw,21vh,190px)}
+.ps .pn{font-size:14px}
+.ps .pv{font-size:42px}
+.ps .pa{font-size:13px}
+html.nogap .gstat>*+*{margin-left:22px}
+@media (orientation:landscape) and (max-height:860px){
+  #vGame.view{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+  .gwrap:not(.online){grid-template-columns:minmax(190px,24%) 1fr;grid-template-rows:1fr auto;gap:8px 22px}
+  .gwrap.solo:not(.online){grid-template-columns:1fr}
+  .gwrap.solo:not(.online) .cpanel{grid-column:1}
+  .gwrap:not(.online) .cpanel{grid-row:1}
+  .gwrap:not(.online) .gact{grid-column:1/-1;grid-row:2;grid-template-columns:1fr 1fr 1.6fr}
+  .gwrap:not(.online) .gact .go{grid-column:auto}
+  .cpanel{grid-template-columns:auto 1fr;grid-template-rows:auto auto auto auto 1fr;grid-template-areas:"name hint" "big hint" "big slots" "big tt" "big stat";column-gap:34px;row-gap:8px;align-content:center}
+  .cname{font-size:20px;align-self:end}
+  .big{font-size:min(50vh,230px);align-self:start}
+  .big.l4{font-size:min(36vh,165px)}
+  .hint{align-self:center;padding:0;min-height:48px}
+  .slots{width:100%;max-width:none}
+  .slot{height:72px}
+  .tt{align-self:center;font-size:24px}
+  .gstat{align-self:start;font-size:17px}
+  .gstat b{font-size:26px}
+  .gact .btn{padding:13px 8px;font-size:18px}
+  .ps .pv{font-size:38px}
+}
 </style>
 </head>
 <body>
@@ -877,7 +917,7 @@ function renderGame(anim){
   if(ty==="x01")bv=t.bust?"SBALLATO":p.score;
   else if(ty==="rtc")bv=p.done?"✓":tName(RTC[p.idx]).toUpperCase();
   else bv=p.score;
-  big.textContent=bv;big.classList.toggle("bust",!!t.bust||(ty==="b27"&&p.out));
+  big.textContent=bv;big.classList.toggle("l4",String(bv).length>=4);big.classList.toggle("bust",!!t.bust||(ty==="b27"&&p.out));
   big.style.fontSize=(t.bust||(ty==="rtc"&&RTC[p.idx]===25&&!p.done))?"min(16vw,90px)":"";
   var sl="";for(var i=0;i<3;i++){var d=t.darts[i];
     if(d){var zi=zone(d.z),sub;
