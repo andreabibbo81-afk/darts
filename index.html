@@ -371,8 +371,9 @@ html.nogap .gstat>*+*{margin-left:22px}
     <button class="item" data-go="setup" data-mode="x01"><span class="n" style="color:var(--acc)">01</span><span><span class="nm">501</span><span class="ds">301 · 501 · 701, chiusure consigliate</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="h100"><span class="n">02</span><span><span class="nm">100 frecce</span><span class="ds">Un numero a scelta: punti e dove finiscono le frecce</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     <button class="item" data-go="setup" data-mode="rtc"><span class="n">03</span><span><span class="nm">Giro del mondo</span><span class="ds">Dall'1 al 20, poi il bull</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-    <button class="item" data-go="setup" data-mode="b27"><span class="n">04</span><span><span class="nm">Bob's 27</span><span class="ds">Tutti i doppi, si parte da 27</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-    <button class="item" data-go="online"><span class="n" style="color:var(--acc)">05</span><span><span class="nm">Sfida online</span><span class="ds">501 contro un compagno a casa sua, con la telecamera</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="setup" data-mode="rtws"><span class="n">04</span><span><span class="nm">Giro del mondo a punti</span><span class="ds">3 frecce per numero dall'1 al bull: singolo 1, doppio 2, triplo 3</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="setup" data-mode="b27"><span class="n">05</span><span><span class="nm">Bob's 27</span><span class="ds">Tutti i doppi, si parte da 27</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="item" data-go="online"><span class="n" style="color:var(--acc)">06</span><span><span class="nm">Sfida online</span><span class="ds">501 contro un compagno a casa sua, con la telecamera</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
   </div>
   <div class="kpis" id="homeKpi"></div>
   <div class="grow"></div>
@@ -394,6 +395,7 @@ html.nogap .gstat>*+*{margin-left:22px}
   <div id="optH100"><div class="sect">Numero su cui tiri</div><div class="tgrid" id="tGrid"></div>
     <div class="small" style="margin-top:8px">Triplo 3 punti · doppio 2 · singolo 1 (sul bull: 25 = 1, 50 = 2). 100 frecce, massimo 300 punti. Le statistiche segnano anche gli altri numeri colpiti.</div></div>
   <div id="optRtc" class="small" style="margin-top:14px">Colpisci i numeri in ordine dall'1 al 20, poi il bull. Vale qualsiasi parte del numero (singolo, doppio o triplo). Vince chi finisce il giro per primo.</div>
+  <div id="optRtws" class="small" style="margin-top:14px">Tre frecce su ogni numero, dall'1 al 20 e poi il bull: 63 frecce in tutto. Singolo 1 punto, doppio 2, triplo 3 (sul bull: 25 = 1, 50 = 2). Dopo tre frecce si passa al numero successivo anche se non l'hai preso. Massimo 186 punti.</div>
   <div id="optB27" class="small" style="margin-top:14px">Si parte da 27 punti. Tre frecce su ogni doppio, da D1 a D20 e poi il bull. Ogni doppio preso aggiunge il suo valore (D1 = 2, D20 = 40, bull = 50); se in una volée non ne prendi nessuno, il valore si toglie. Sotto zero la partita finisce.</div>
   <div id="optBot"><div class="sect">Gioca contro il bot · livello e media a 3 freccette</div><div class="bgrid" id="bGrid"></div></div>
   <div class="sect">Giocatori · tocca in ordine di tiro (max 4)</div>
@@ -830,7 +832,7 @@ function renderHome(){
 function renderSetup(){
   var m=setup.mode||"x01";
   $("setupTitle").innerHTML="Nuova partita<br><span style='color:var(--acc)'>"+esc(MODE_NAMES[m])+"</span>";
-  $("optX01").hidden=m!=="x01";$("optBot").hidden=m!=="x01";
+  $("optX01").hidden=m!=="x01";$("optBot").hidden=m!=="x01";$("optRtws").hidden=m!=="rtws";
   $("bGrid").innerHTML='<button class="none'+(setup.bot?"":" on")+'" data-bot="0">Nessun bot</button>'+BOT_LV.map(function(l,i){return '<button data-bot="'+(i+1)+'" class="'+(setup.bot===i+1?"on":"")+'"><b>Liv. '+(i+1)+'</b><span>media '+l[0]+'</span><i>'+l[2]+'</i></button>';}).join("");$("optH100").hidden=m!=="h100";$("optRtc").hidden=m!=="rtc";$("optB27").hidden=m!=="b27";
   $("tGrid").innerHTML=RTC.map(function(n){return '<button data-t="'+n+'" class="'+(n===setup.h100t?"on":"")+(n===25?" bl":"")+'">'+tName(n)+'</button>';}).join("");
   document.querySelectorAll("#vSetup .seg").forEach(function(sg){var o=sg.dataset.opt;sg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",String(setup[o])===b.dataset.v);});});
@@ -868,7 +870,7 @@ function goFull(){ // nasconde la barra di Chrome durante la partita (serve un t
 }
 
 /* ================= partite ================= */
-var MODE_NAMES={x01:"501",h100:"100 frecce",rtc:"Giro del mondo",b27:"Bob's 27"};
+var MODE_NAMES={x01:"501",h100:"100 frecce",rtc:"Giro del mondo",rtws:"Giro del mondo a punti",b27:"Bob's 27"};
 var RTC=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
 var B27=RTC;
 function tName(n){return n===25?"Bull":String(n);}
@@ -883,6 +885,7 @@ function newGame(names){
       if(m==="x01"){p.score=setup.start;p.opened=setup.inRule==="open";}
       if(m==="h100"){p.score=0;p.n=0;p.cnt={};}
       if(m==="rtc"){p.idx=0;p.n=0;p.hits=0;p.per=[];}
+      if(m==="rtws"){p.score=0;p.n=0;p.idx=0;p.cnt={};p.per=[];}
       if(m==="b27"){p.score=27;p.idx=0;p.n=0;p.hits=0;p.per=[];p.out=false;}
       return p;}),
     cur:0,wait:false,ready:false,over:false,winner:null,savedId:null};
@@ -953,6 +956,14 @@ function dartOther(z){
     if(t.darts.length===3||p.done)endVolley();
     return;
   }
+  if(g.type==="rtws"){ // giro del mondo a punti: 3 frecce per numero
+    num=RTC[p.idx];hit=z!=="MISS"&&zi.seg===num;v=hit?(zi.bull?(zi.dbl?2:1):zi.mult):0;
+    p.cnt[z]=(p.cnt[z]||0)+1;p.score+=v;p.per[p.idx]=(p.per[p.idx]||0)+v;
+    t.darts.push({z:z,v:v,hit:hit,tg:num});
+    if(!fxHit(zi))play(hit?hitSound(zi):"out");
+    if(t.darts.length===3)endVolley();
+    return;
+  }
   if(g.type==="rtc"){
     num=RTC[p.idx];hit=num===25?!!zi.bull:(zi.seg===num&&!zi.bull);
     p.per[p.idx]=(p.per[p.idx]||0)+1;
@@ -973,7 +984,8 @@ function dartOther(z){
 }
 function endVolley(){
   var g=game,p=P(),t=T();
-  if(g.type==="h100"){
+  if(g.type==="rtws"){p.idx++;if(p.idx>=RTC.length)p.done=true;}
+  if(g.type==="h100"||g.type==="rtws"){
     var tot=t.darts.reduce(function(s,d){return s+d.v;},0);
     if(tot===9)play("max",0.2);else if(tot>=7)play("ton40",0.2);else if(tot>=5)play("ton",0.2);else if(!p.done)playJ("ROUND",0.95);
   }
@@ -984,7 +996,7 @@ function endVolley(){
     if(p.score<0){p.out=true;p.done=true;play("over",0.4);say(p.name+" è sotto zero");}
     else if(p.idx>=B27.length){p.done=true;}
   }
-  if(g.type!=="h100"&&!p.done)playJ("ROUND",0.95);
+  if(g.type!=="h100"&&g.type!=="rtws"&&!p.done)playJ("ROUND",0.95);
   g.wait=true;
   if(g.players.every(function(q){return q.done;}))endGame();
 }
@@ -1042,6 +1054,19 @@ function h100Best(name,target){
       if(!best||r.pts>best.pts||(r.pts===best.pts&&r.M<best.M))best=r;});});
   return best;
 }
+function rtwsSplit(q){var o={pts:q.score,S:0,D:0,T:0,M:0};
+  q.turns.forEach(function(t){t.darts.forEach(function(d){var zi=zone(d.z);if(!d.hit)o.M++;else if(zi.trp)o.T++;else if(zi.dbl)o.D++;else o.S++;});});return o;}
+function rtwsBest(name){var best=null;
+  games.forEach(function(g){if(gType(g)!=="rtws"||(game&&g.id===game.savedId))return;
+    g.players.forEach(function(q){if(q.name!==name||q.darts<63)return;var r={pts:q.pts,S:q.S,D:q.D,T:q.T,M:q.M};
+      if(!best||r.pts>best.pts||(r.pts===best.pts&&r.M<best.M))best=r;});});
+  return best;}
+function cmpTable(now,best,noT){
+  var cols=[["Punti","pts"],["Singoli","S"],["Doppi","D"]].concat(noT?[]:[["Tripli","T"]]).concat([["Mancati","M"]]);
+  function row(lab,o,cls){return '<tr class="'+cls+'"><th>'+lab+'</th>'+cols.map(function(c){return '<td>'+(o?o[c[1]]:'—')+'</td>';}).join("")+'</tr>';}
+  return '<table class="h1c"><tr class="hd"><th></th>'+cols.map(function(c){return '<td>'+c[0]+'</td>';}).join("")+'</tr>'+row("Adesso",now,"now")+row("Migliore",best,"best")+'</table>';
+}
+function rtwsCmp(p){return cmpTable(rtwsSplit(p),rtwsBest(p.name),false);}
 function h100Cmp(p,g){
   var b=hBreak(p.cnt,g.target),now={pts:p.score,S:b.S,D:b.D,T:b.T,M:p.n-b.on},best=h100Best(p.name,g.target),bull=g.target===25;
   var cols=[["Punti","pts"],["Singoli","S"],["Doppi","D"]].concat(bull?[]:[["Tripli","T"]]).concat([["Mancati","M"]]);
@@ -1068,6 +1093,7 @@ function sideInfo(q){
   var t=game.type;
   if(t==="x01")return [q.score,"media "+fmt(pStats(q).avg)];
   if(t==="h100")return [q.score,q.n+"/100 frecce"];
+  if(t==="rtws")return [q.score,q.n+"/63 frecce"];
   if(t==="rtc")return [q.done?"✓":tName(RTC[q.idx]),q.n+" frecce"];
   return [q.score,q.out?"sotto zero":q.done?"finito":dName(B27[q.idx])];
 }
@@ -1079,7 +1105,7 @@ function renderGame(anim){
     :ty==="h100"?"100 frecce · "+tName(g.target):MODE_NAMES[ty];
   $("gScores").innerHTML=g.players.map(function(q,i){var a=sideInfo(q);
     return '<div class="ps'+(i===g.cur?" cur":"")+(q.done&&!g.over?" dn":"")+'"><div class="pn">'+esc(q.name)+'</div><div class="pv">'+a[0]+'</div><div class="pa">'+a[1]+'</div></div>';}).join("");
-  var lab={x01:"Turno "+p.turns.length,h100:"Punti",rtc:"Colpisci il",b27:"Punteggio"}[ty];
+  var lab={x01:"Turno "+p.turns.length,h100:"Punti",rtc:"Colpisci il",rtws:"Punti",b27:"Punteggio"}[ty];
   $("gName").textContent=many?p.name:(g.over?"Finita!":lab);
   var big=$("gBig"),bv;
   if(ty==="x01")bv=t.bust?"SBALLATO":p.score;
@@ -1098,6 +1124,7 @@ function renderGame(anim){
   var tt="&nbsp;";
   if(ty==="x01"){if(t.darts.length)tt='Turno: <b>'+(t.bust?0:t.start-p.score)+'</b>';}
   else if(ty==="h100")tt='Freccia <b>'+p.n+'</b> di 100';
+  else if(ty==="rtws")tt='Freccia <b>'+p.n+'</b> di 63 · numero '+Math.min(p.idx+1,21)+' di 21';
   else if(ty==="rtc")tt='Frecce: <b>'+p.n+'</b> · numero '+Math.min(p.idx+1,21)+' di 21';
   else if(ty==="b27"){if(t.minus)tt='Nessun doppio: <b>−'+t.minus+'</b>';else if(t.darts.length){var gain=t.darts.reduce(function(s,d){return s+d.v;},0);tt='Volée: <b>+'+gain+'</b>';}}
   $("gTT").innerHTML=tt;
@@ -1112,11 +1139,13 @@ function renderGame(anim){
   }
   else if(ty==="h100")h='<span class="small cot">Bersaglio</span><span class="co fin">'+tName(g.target)+'</span>';
   else if(ty==="rtc")h='<span class="small cot">Bersaglio</span><span class="co fin">'+tName(RTC[p.idx])+'</span>';
+  else if(ty==="rtws"&&!p.done)h='<span class="small cot">Bersaglio</span><span class="co fin">'+tName(RTC[p.idx])+'</span>';
   else if(ty==="b27"){var nn=B27[p.idx],vv=nn===25?50:nn*2;h='<span class="small cot">Bersaglio</span><span class="co fin">'+dName(nn)+'</span><span class="small">± '+vv+'</span>';}
   $("gHint").innerHTML=h;
   var st="";
   if(ty==="x01"){var s=pStats(p);st='<span>Media <b>'+fmt(s.avg)+'</b></span><span>Oggi <b>'+fmt(todayAvg(p,s))+'</b></span><span>Frecce <b>'+s.darts+'</b></span>';}
   else if(ty==="h100")st=h100Cmp(p,g);
+  else if(ty==="rtws")st=rtwsCmp(p);
   else if(ty==="rtc")st='<span>A segno <b>'+pct(p.hits,p.n)+'</b></span>';
   else st='<span>Doppi presi <b>'+p.hits+'</b> su <b>'+p.n+'</b> frecce</span>';
   $("gStat").innerHTML=st;
@@ -1420,6 +1449,11 @@ function showSummary(){
     var hard=w.per.map(function(c,i){return [tName(RTC[i]),c];}).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
     body+='<div class="small">Più difficili: '+hard.map(function(h){return h[0]+' ('+h[1]+' frecce)';}).join(", ")+'</div>';
   }
+  if(ty==="rtws"){
+    head='<div class="kl">Giro del mondo a punti'+(many?' · vince '+esc(w.name):'')+'</div><h3>'+w.score+' punti</h3><div class="small">Massimo possibile 186</div>';
+    body='<table><tr><th>Giocatore</th><th>Punti</th><th>Singoli</th><th>Doppi</th><th>Tripli</th><th>Mancati</th></tr>'+g.players.map(function(q){var o=rtwsSplit(q);return '<tr><td>'+esc(q.name)+'</td><td>'+o.pts+'</td><td>'+o.S+'</td><td>'+o.D+'</td><td>'+o.T+'</td><td>'+o.M+'</td></tr>';}).join("")+'</table>'+
+      '<div class="sect">Punti per numero'+(many?' · '+esc(w.name):'')+'</div><div class="dgrid">'+RTC.map(function(n,i){return '<div><b>'+tName(n)+'</b><span>'+(w.per[i]||0)+' pt</span></div>';}).join("")+'</div>';
+  }
   if(ty==="b27"){
     head='<div class="kl">Bob\'s 27'+(many?' · vince '+esc(w.name):'')+'</div><h3>'+w.score+'</h3><div class="small">'+(w.out?'Sotto zero su '+dName(B27[w.idx-1]):'Giro dei doppi completato')+'</div>';
     body='<table><tr><th>Giocatore</th><th>Punti</th><th>Doppi presi</th><th>%</th><th>Arrivato a</th></tr>'+g.players.map(function(q){return '<tr><td>'+esc(q.name)+'</td><td>'+q.score+'</td><td>'+q.hits+'</td><td>'+pct(q.hits,q.n)+'</td><td>'+(q.out?dName(B27[q.idx-1]):"fine")+'</td></tr>';}).join("")+'</table>';
@@ -1451,6 +1485,8 @@ function saveGame(){
   }
   if(g.type==="h100"){rec.target=g.target;rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,cnt:q.cnt,
     tz:q.turns.filter(function(t){return t.darts.length;}).map(function(t){return t.darts.map(function(d){return d.z;});})};});}
+  if(g.type==="rtws")rec.players=g.players.map(function(q,i){var o=rtwsSplit(q);return {name:q.name,won:i===g.winner&&g.players.length>1,pts:q.score,darts:q.n,S:o.S,D:o.D,T:o.T,M:o.M,per:q.per,cnt:q.cnt,
+    tz:q.turns.filter(function(t){return t.darts.length;}).map(function(t){return t.darts.map(function(d){return d.z;});})};});
   if(g.type==="rtc")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner,done:q.done,darts:q.n,hits:q.hits,reached:q.idx,per:q.per};});
   if(g.type==="b27")rec.players=g.players.map(function(q,i){return {name:q.name,won:i===g.winner&&g.players.length>1,score:q.score,out:q.out,reached:q.idx,hits:q.hits,darts:q.n,per:q.per};});
   if(online)online.saved[g.id]=1;games.push(rec);store("gb_games",games);game.savedId=rec.id;syncAfterSave();
@@ -1624,6 +1660,39 @@ function h100PerTable(sel,target){
   var old=cols.some(function(c){return c.a.det<c.a.n;});
   return ptHtml(cols,secs)+(old?'<div class="small" style="margin-top:6px">Le sessioni giocate prima di questo aggiornamento non hanno l\'ordine delle frecce: per quelle mancano i punti delle prime/seconde 50 e le serie di fila.</div>':'');
 }
+// ---- Giro del mondo a punti: statistiche ----
+function rtwsAgg(list){
+  var a={n:0,darts:0,pts:0,on:0,T:0,D:0,S:0,M:0,det:0,mx:{pts:null,T:null,D:null,S:null},run:{on:0,T:0,D:0,S:0,M:0},per:[],perN:[]};
+  function mx(k,v){if(a.mx[k]==null||v>a.mx[k])a.mx[k]=v;}
+  list.forEach(function(gp){var p=gp[1];
+    a.n++;a.darts+=p.darts;a.pts+=p.pts;a.T+=p.T;a.D+=p.D;a.S+=p.S;a.M+=p.M;a.on+=p.S+p.D+p.T;
+    mx("pts",p.pts);mx("T",p.T);mx("D",p.D);mx("S",p.S);
+    RTC.forEach(function(n,i){if(p.darts>=(i+1)*3){a.per[i]=(a.per[i]||0)+((p.per||[])[i]||0);a.perN[i]=(a.perN[i]||0)+1;}});
+    if(!p.tz)return;a.det++;var cur={on:0,T:0,D:0,S:0,M:0};
+    p.tz.forEach(function(t,ti){var num=RTC[ti];t.forEach(function(z){var zi=zone(z),hit=z!=="MISS"&&zi.seg===num;
+      var f={on:hit,T:hit&&!!zi.trp,D:hit&&!!zi.dbl,S:hit&&!zi.trp&&!zi.dbl,M:!hit};
+      for(var q in cur){cur[q]=f[q]?cur[q]+1:0;if(cur[q]>a.run[q])a.run[q]=cur[q];}});});});
+  return a;
+}
+function rtwsPerTable(list){
+  var groups={},order=[];
+  list.forEach(function(gp){var pk=perKey(new Date(gp[0].date),sv.per);if(!groups[pk.k]){groups[pk.k]={h:pk.h,list:[]};order.push(pk.k);}groups[pk.k].list.push(gp);});
+  order.sort().reverse();
+  var cols=order.slice(0,12).map(function(k){return {h:groups[k].h,a:rtwsAgg(groups[k].list)};});
+  if(!cols.length)return "";
+  function P(k,b){return function(a){return a.darts?[fmt(a[k]/a.darts*100)+"%",a[k]/a.darts]:null;};}
+  function N(k){return function(a){return a.n?[a[k],a[k]]:null;};}
+  function M(k){return function(a){return a.mx[k]!=null?[a.mx[k],a.mx[k]]:null;};}
+  function Rn(k){return function(a){return a.det?[a.run[k],a.run[k]]:null;};}
+  var L={on:"A segno",T:"Tripli",D:"Doppi",S:"Singoli",M:"Mancati"},K=["on","T","D","S","M"];
+  var secs=[["Sessioni",[["Sessioni",function(a){return [a.n,null];}],["Punti medi",function(a){return a.n?[fmt(a.pts/a.n),a.pts/a.n]:null;},1]]],
+    ["% di precisione",K.map(function(k){return [L[k],P(k),k==="M"?-1:1];})],
+    ["Frecce",[["Tirate",function(a){return [a.darts,null];}]].concat(K.map(function(k){return [L[k],N(k),k==="M"?-1:1];}))],
+    ["Massimo in una sessione",[["Punti",M("pts"),1],["Tripli",M("T"),1],["Doppi",M("D"),1],["Singoli",M("S"),1]]],
+    ["Di fila (serie più lunga)",K.map(function(k){return [L[k],Rn(k),k==="M"?-1:1];})],
+    ["Punti medi per numero",RTC.map(function(n,i){return [tName(n),function(a){return a.perN[i]?[fmt(a.per[i]/a.perN[i]),a.per[i]/a.perN[i]]:null;},1];})]];
+  return ptHtml(cols,secs);
+}
 function avg3(x){return x[1]?[fmt(x[0]/x[1]*3),x[0]/x[1]*3]:null;}
 function topList(o,i,num){var l=Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1]||(num?b[0]-a[0]:0);});return l[i]?[esc(l[i][0])+"<small>"+l[i][1]+"×</small>",null]:null;}
 function perTable(mine,out){
@@ -1689,7 +1758,7 @@ function dd(g){return new Date(g.date).toLocaleDateString("it-IT",{day:"2-digit"
 function renderStats(){
   var names=players.slice();games.forEach(function(g){g.players.forEach(function(p){if(names.indexOf(p.name)<0&&!botLevel(p.name))names.push(p.name);});});
   if(!statSel||names.indexOf(statSel)<0)statSel=names[0];
-  $("sModes").innerHTML=["x01","h100","rtc","b27"].map(function(m){return '<button class="chip'+(m===statMode?" on":"")+'" data-sm="'+m+'">'+MODE_NAMES[m]+'</button>';}).join("");
+  $("sModes").innerHTML=["x01","h100","rtc","rtws","b27"].map(function(m){return '<button class="chip'+(m===statMode?" on":"")+'" data-sm="'+m+'">'+MODE_NAMES[m]+'</button>';}).join("");
   $("sChips").innerHTML=names.map(function(n){return '<button class="chip'+(n===statSel?" on":"")+'" data-sp="'+esc(n)+'">'+esc(n)+'</button>';}).join("");
   var mine=mineOf(statSel,statMode),extra="",list="",cells=[];
   $("sTgtWrap").hidden=statMode!=="h100";
@@ -1732,6 +1801,14 @@ function renderStats(){
       '<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>';
     list=sel.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1],bb=hBreak(p.cnt,g.target);
       return '<div class="g"><span>'+dd(g)+' · sul '+tName(g.target)+'</span><span><b>'+p.pts+'</b> punti · '+pct(bb.on,p.darts)+'</span></div>';}).join("");
+  }
+  if(statMode==="rtws"){
+    $("sTitle").textContent="Giro del mondo a punti · tutte le sessioni";
+    var A=rtwsAgg(mine);
+    cells=[["Sessioni",A.n],["Punti medi",A.n?fmt(A.pts/A.n,1):"—"],["Record",A.mx.pts!=null?A.mx.pts:"—"],["A segno",pct(A.on,A.darts)],
+      ["Tripli",pct(A.T,A.darts)],["Doppi",pct(A.D,A.darts)],["Singoli",pct(A.S,A.darts)],["Mancati",pct(A.M,A.darts)]];
+    if(mine.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+rtwsPerTable(mine);
+    list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+'</span><span><b>'+p.pts+'</b> punti · '+pct(p.S+p.D+p.T,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="rtc"){
     $("sTitle").textContent="Giro del mondo";
