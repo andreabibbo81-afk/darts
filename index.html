@@ -1577,13 +1577,14 @@ var heatK=null;
 function zName(z){if(z==="MISS")return "Fuori";if(z==="BULL")return "Bull 25";if(z==="DBULL")return "Bull 50";
   var n=parseInt(z.slice(1),10);if(z[0]==="T")return "Triplo "+n;if(z[0]==="D")return "Doppio "+n;return (/i$/.test(z)?"Singolo basso ":"Singolo alto ")+n;}
 // scala colori: percentuale delle frecce totali finite in quella zona
-var HEAT_SCALE=[[10,"#A63DFF","viola","10% e oltre"],[5,"#FF3B30","rosso","5–10%"],[2,"#FF8A00","arancione","2–5%"],[0,"#FFD400","giallo","sotto il 2%"]];
-function heatCol(c,tot){if(!c)return null;var p=c/tot*100;for(var i=0;i<HEAT_SCALE.length;i++)if(p>=HEAT_SCALE[i][0])return HEAT_SCALE[i][1];return HEAT_SCALE[3][1];}
+// [soglia %, colore, opacità, etichetta]: dal più colpito al meno colpito
+var HEAT_SCALE=[[20,"#A63DFF",1,"20% e oltre"],[10,"#F032C8",1,"10–20%"],[5,"#FF3B30",1,"5–10%"],[2,"#FF8A00",1,"2–5%"],[1,"#FFD400",1,"1–2%"],[0,"#FFD400",0.35,"sotto l'1%"]];
+function heatCol(c,tot){if(!c)return null;var p=c/tot*100;for(var i=0;i<HEAT_SCALE.length;i++)if(p>=HEAT_SCALE[i][0])return HEAT_SCALE[i];return HEAT_SCALE[HEAT_SCALE.length-1];}
 function heatSvg(cnt,tot){
   var R={db:7,bull:16,tIn:99,tOut:107,dIn:162,dOut:170},h='';
   function pt(r,a){a=(a-90)*Math.PI/180;return (r*Math.cos(a)).toFixed(2)+","+(r*Math.sin(a)).toFixed(2);}
   function arc(r1,r2,a1,a2){return "M"+pt(r2,a1)+" A"+r2+","+r2+" 0 0 1 "+pt(r2,a2)+" L"+pt(r1,a2)+" A"+r1+","+r1+" 0 0 0 "+pt(r1,a1)+"Z";}
-  function fill(z){var col=heatCol(cnt[z]||0,tot);return col?'fill="'+col+'"':'fill="#0E2152"';}
+  function fill(z){var q=heatCol(cnt[z]||0,tot);return q?'fill="'+q[1]+'"'+(q[2]<1?' fill-opacity="'+q[2]+'"':''):'fill="#0E2152"';}
   h+='<circle r="200" fill="#081533"/>';
   ORDER.forEach(function(n,i){var a1=i*18-9,a2=i*18+9;
     [["S"+n+"i",R.bull,R.tIn],["T"+n,R.tIn,R.tOut],["S"+n+"o",R.tOut,R.dIn],["D"+n,R.dIn,R.dOut]].forEach(function(q){
@@ -1598,7 +1599,7 @@ function cntH100(p){return p.cnt||null;}
 function heatSection(mine,getCnt){
   getCnt=getCnt||cntX01;
   var groups={},order=[];
-  mine.forEach(function(gp){var c=getCnt(gp[1]);if(!c)return;var pk=perKey(new Date(gp[0].date),sv.per);
+  mine.forEach(function(gp){var c=getCnt(gp[1]);if(!c||!Object.keys(c).length)return;var pk=perKey(new Date(gp[0].date),sv.per);
     if(!groups[pk.k]){groups[pk.k]={t:pk.t,cnt:{},n:0};order.push(pk.k);}
     var G=groups[pk.k];for(var z in c){G.cnt[z]=(G.cnt[z]||0)+c[z];G.n+=c[z];}});
   if(!order.length)return '<div class="sect">Bersaglio · dove finiscono le frecce</div><div class="card small">Il bersaglio compare dopo la prima partita a 501 giocata con questa versione dell\'app (salva ogni freccia). Gioca e finisci una partita con la chiusura selezionata qui sopra: lo trovi qui.</div>';
@@ -1623,7 +1624,7 @@ function heatSection(mine,getCnt){
   return '<div class="sect">Bersaglio · dove finiscono le frecce</div>'+
     '<div class="chips">'+order.map(function(k){return '<button class="chip'+(k===heatK?" on":"")+'" data-hk="'+k+'">'+esc(groups[k].t)+'</button>';}).join("")+'</div>'+
     heatSvg(G.cnt,G.n||1)+
-    '<div class="hleg">'+HEAT_SCALE.map(function(q){return '<span><i style="background:'+q[1]+'"></i>'+q[3]+'</span>';}).join("")+'</div>'+
+    '<div class="hleg">'+HEAT_SCALE.map(function(q){return '<span><i style="background:'+q[1]+';opacity:'+q[2]+'"></i>'+q[3]+'</span>';}).join("")+'</div>'+
     '<div class="small" style="text-align:center;margin-bottom:10px">Colore di ogni zona = percentuale delle frecce finite lì · '+G.n+' frecce. Le percentuali sono sul totale delle frecce tirate.</div>'+
     '<div class="hlist">'+rows.join("")+'</div>';
 }
