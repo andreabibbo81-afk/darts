@@ -223,6 +223,9 @@ nav.tabs svg{display:block;margin:0 auto 4px}
 .pt td.best{color:var(--ok);font-weight:800}
 .pt td.na{color:var(--mut)}
 .heat{display:block;width:100%;max-width:420px;margin:14px auto 6px}
+.hleg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:4px 0 8px;font-size:13px;color:var(--txt)}
+.hleg span{display:inline-flex;align-items:center;gap:6px}
+.hleg i{display:inline-block;width:14px;height:14px;border-radius:3px}
 .hlist{border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .hs{padding:12px 14px;border-top:1px solid var(--line)}
 .hs:first-child{border-top:0}
@@ -1573,11 +1576,14 @@ function bigPct(list){var t=0,d=0;list.forEach(function(gp){var p=gp[1];if(!p.tt
 var heatK=null;
 function zName(z){if(z==="MISS")return "Fuori";if(z==="BULL")return "Bull 25";if(z==="DBULL")return "Bull 50";
   var n=parseInt(z.slice(1),10);if(z[0]==="T")return "Triplo "+n;if(z[0]==="D")return "Doppio "+n;return (/i$/.test(z)?"Singolo basso ":"Singolo alto ")+n;}
-function heatSvg(cnt,max){
+// scala colori: percentuale delle frecce totali finite in quella zona
+var HEAT_SCALE=[[10,"#A63DFF","viola","10% e oltre"],[5,"#FF3B30","rosso","5–10%"],[2,"#FF8A00","arancione","2–5%"],[0,"#FFD400","giallo","sotto il 2%"]];
+function heatCol(c,tot){if(!c)return null;var p=c/tot*100;for(var i=0;i<HEAT_SCALE.length;i++)if(p>=HEAT_SCALE[i][0])return HEAT_SCALE[i][1];return HEAT_SCALE[3][1];}
+function heatSvg(cnt,tot){
   var R={db:7,bull:16,tIn:99,tOut:107,dIn:162,dOut:170},h='';
   function pt(r,a){a=(a-90)*Math.PI/180;return (r*Math.cos(a)).toFixed(2)+","+(r*Math.sin(a)).toFixed(2);}
   function arc(r1,r2,a1,a2){return "M"+pt(r2,a1)+" A"+r2+","+r2+" 0 0 1 "+pt(r2,a2)+" L"+pt(r1,a2)+" A"+r1+","+r1+" 0 0 0 "+pt(r1,a1)+"Z";}
-  function fill(z){var c=cnt[z]||0;return c?'fill="#FFD400" fill-opacity="'+(0.18+0.82*c/max).toFixed(2)+'"':'fill="#0E2152"';}
+  function fill(z){var col=heatCol(cnt[z]||0,tot);return col?'fill="'+col+'"':'fill="#0E2152"';}
   h+='<circle r="200" fill="#081533"/>';
   ORDER.forEach(function(n,i){var a1=i*18-9,a2=i*18+9;
     [["S"+n+"i",R.bull,R.tIn],["T"+n,R.tIn,R.tOut],["S"+n+"o",R.tOut,R.dIn],["D"+n,R.dIn,R.dOut]].forEach(function(q){
@@ -1612,8 +1618,9 @@ function heatSection(mine){
       '<div class="hp">'+parts.map(function(q){var c=x.p[q[0]]||0;return '<span'+(c?'':' class="z"')+'><i style="background:'+COLS[q[0]]+'"></i>'+q[1]+' <b>'+pc(c)+'</b></span>';}).join("")+'</div>':'')+'</div>';});
   return '<div class="sect">Bersaglio · dove finiscono le frecce</div>'+
     '<div class="chips">'+order.map(function(k){return '<button class="chip'+(k===heatK?" on":"")+'" data-hk="'+k+'">'+esc(groups[k].t)+'</button>';}).join("")+'</div>'+
-    heatSvg(G.cnt,max||1)+
-    '<div class="small" style="text-align:center;margin-bottom:10px">Più è giallo, più frecce sono finite lì · '+G.n+' frecce. Le percentuali sono sul totale delle frecce tirate.</div>'+
+    heatSvg(G.cnt,G.n||1)+
+    '<div class="hleg">'+HEAT_SCALE.map(function(q){return '<span><i style="background:'+q[1]+'"></i>'+q[3]+'</span>';}).join("")+'</div>'+
+    '<div class="small" style="text-align:center;margin-bottom:10px">Colore di ogni zona = percentuale delle frecce finite lì · '+G.n+' frecce. Le percentuali sono sul totale delle frecce tirate.</div>'+
     '<div class="hlist">'+rows.join("")+'</div>';
 }
 // ---- 100 frecce: statistiche per periodo (giorno, settimana, mese, anno) sul numero scelto ----
