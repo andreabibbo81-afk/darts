@@ -1592,11 +1592,15 @@ function heatSvg(cnt,tot){
   h+='<circle r="'+R.bull+'" '+fill("BULL")+' stroke="#22397A"/><circle r="'+R.db+'" '+fill("DBULL")+' stroke="#22397A"/>';
   return '<svg class="heat" viewBox="-205 -205 410 410">'+h+'</svg>';
 }
-function heatSection(mine){
+// getCnt(p) restituisce {zona: frecce} della partita, o null se la partita non ha il dettaglio delle frecce
+function cntX01(p){if(!p.tt)return null;var c={};p.tt.forEach(function(t){t.z.forEach(function(z){c[z]=(c[z]||0)+1;});});return c;}
+function cntH100(p){return p.cnt||null;}
+function heatSection(mine,getCnt){
+  getCnt=getCnt||cntX01;
   var groups={},order=[];
-  mine.forEach(function(gp){var p=gp[1];if(!p.tt)return;var pk=perKey(new Date(gp[0].date),sv.per);
+  mine.forEach(function(gp){var c=getCnt(gp[1]);if(!c)return;var pk=perKey(new Date(gp[0].date),sv.per);
     if(!groups[pk.k]){groups[pk.k]={t:pk.t,cnt:{},n:0};order.push(pk.k);}
-    var G=groups[pk.k];p.tt.forEach(function(t){t.z.forEach(function(z){G.cnt[z]=(G.cnt[z]||0)+1;G.n++;});});});
+    var G=groups[pk.k];for(var z in c){G.cnt[z]=(G.cnt[z]||0)+c[z];G.n+=c[z];}});
   if(!order.length)return '<div class="sect">Bersaglio · dove finiscono le frecce</div><div class="card small">Il bersaglio compare dopo la prima partita a 501 giocata con questa versione dell\'app (salva ogni freccia). Gioca e finisci una partita con la chiusura selezionata qui sopra: lo trovi qui.</div>';
   order.sort().reverse();order=order.slice(0,12);
   if(order.indexOf(heatK)<0)heatK=order[0];
@@ -1810,7 +1814,7 @@ function renderStats(){
     if(statTgt!==25)cells.push(["Tripli",pct(b.T,dts)]);
     cells.push(["Doppi",pct(b.D,dts)],["Singoli",pct(b.S,dts)],["Fuori",pct(b.miss,dts)]);
     if(sel.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+h100PerTable(sel,statTgt)+
-      '<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>';
+      '<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>'+heatSection(sel,cntH100);
     list=sel.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1],bb=hBreak(p.cnt,g.target);
       return '<div class="g"><span>'+dd(g)+' · sul '+tName(g.target)+'</span><span><b>'+p.pts+'</b> punti · '+pct(bb.on,p.darts)+'</span></div>';}).join("");
   }
