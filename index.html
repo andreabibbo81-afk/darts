@@ -54,6 +54,7 @@ nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1
 .seg button{flex:1;padding:13px 6px;font-weight:700;font-size:15px;border-left:1px solid var(--line)}
 .seg button:first-child{border-left:0}
 .seg button.on{background:var(--acc);color:var(--ink)}
+.seg.per5 button{font-size:13.5px;padding:13px 2px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-weight:700;display:flex;align-items:center;gap:8px}
 .chip.on{background:var(--acc);color:var(--ink);border-color:var(--acc)}
@@ -1618,7 +1619,7 @@ function statsFor(name,list){
 }
 /* ---- 501: statistiche dettagliate per periodo (giorno, settimana, mese, anno) ---- */
 var OUT_NAMES={single:"Normale",master:"Master out",double:"Double out"};
-var PER_NAMES={d:"Giorno",w:"Settimana",m:"Mese",y:"Anno"};
+var PER_NAMES={d:"Giorno",w:"Settimana",m:"Mese",y:"Anno",a:"Sempre"};
 var sv=Object.assign({out:null,per:"d",start:null},load("gb_statview",{}));
 function svSave(){store("gb_statview",sv);}
 function oppKind(g,p){if(g.players.length<2)return "solo";return g.players.some(function(q){return q!==p&&botLevel(q.name);})?"bot":"amici";}
@@ -1669,6 +1670,7 @@ function perKey(d,per){
   function p2(n){return (n<10?"0":"")+n;}
   function dm(x){return x.getDate()+"/"+(x.getMonth()+1);}
   var y=d.getFullYear(),m=d.getMonth(),day=d.getDate(),now=new Date().getFullYear();
+  if(per==="a")per="y"; // "Sempre": il confronto è anno per anno
   if(per==="y")return {k:""+y,h:""+y,t:""+y};
   if(per==="m")return {k:y+"-"+p2(m+1),h:d.toLocaleDateString("it-IT",{month:"short"})+"<small>"+y+"</small>",t:d.toLocaleDateString("it-IT",{month:"short"})+" "+y};
   if(per==="w"){var mo=new Date(y,m,day-((d.getDay()+6)%7)),su=new Date(mo.getFullYear(),mo.getMonth(),mo.getDate()+6);
@@ -1884,9 +1886,9 @@ var statSel=null,statMode="x01",statTgt=null;
 // periodo scelto (giorno/settimana/mese/anno): l'ultimo in cui hai giocato → riepilogo in alto
 function perPick(list){
   var lastK=null,lastT="";list.forEach(function(gp){var pk=perKey(new Date(gp[0].date),sv.per);if(lastK==null||pk.k>lastK){lastK=pk.k;lastT=pk.t;}});
-  var sel=list.filter(function(gp){return perKey(new Date(gp[0].date),sv.per).k===lastK;});
-  if(list.length)$("sPerTop").innerHTML='<div class="sect">Periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>';
-  return {sel:sel,lab:sel.length?{d:lastT,w:"settimana "+lastT,m:lastT,y:"anno "+lastT}[sv.per]:""};
+  var sel=sv.per==="a"?list:list.filter(function(gp){return perKey(new Date(gp[0].date),sv.per).k===lastK;});
+  if(list.length)$("sPerTop").innerHTML='<div class="sect">Periodo</div><div class="seg per5" id="sPer">'+["d","w","m","y","a"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>';
+  return {sel:sel,lab:sel.length?{d:lastT,w:"settimana "+lastT,m:lastT,y:"anno "+lastT,a:"da sempre"}[sv.per]:""};
 }
 function perLabT(P){return P.lab?" · "+P.lab:"";}
 // tabella di confronto per periodo generica: agg(lista) → oggetto, secs = [[titolo,[[riga,f(a)→[testo,valore],verso]]]]
