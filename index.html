@@ -475,6 +475,7 @@ html.nogap .gstat>*+*{margin-left:22px}
   <div class="chips" id="sChips" style="margin-top:10px"></div>
   <div id="sTgtWrap" hidden><div class="sect">Numero</div><div class="chips" id="sTargets"></div></div>
   <div id="sX01" hidden><div class="sect">Chiusura</div><div class="seg" id="sOut"></div><div class="chips" id="sStart" style="margin-top:10px"></div></div>
+  <div id="sPerTop"></div>
   <div class="sect" id="sTitle">501 · partite concluse</div>
   <div class="sgrid" id="sGrid"></div>
   <div id="sExtra"></div>
@@ -1880,6 +1881,25 @@ function ptHtml(cols,secs){
 }
 
 var statSel=null,statMode="x01",statTgt=null;
+// periodo scelto (giorno/settimana/mese/anno): l'ultimo in cui hai giocato → riepilogo in alto
+function perPick(list){
+  var lastK=null,lastT="";list.forEach(function(gp){var pk=perKey(new Date(gp[0].date),sv.per);if(lastK==null||pk.k>lastK){lastK=pk.k;lastT=pk.t;}});
+  var sel=list.filter(function(gp){return perKey(new Date(gp[0].date),sv.per).k===lastK;});
+  if(list.length)$("sPerTop").innerHTML='<div class="sect">Periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>';
+  return {sel:sel,lab:sel.length?{d:lastT,w:"settimana "+lastT,m:lastT,y:"anno "+lastT}[sv.per]:""};
+}
+function perLabT(P){return P.lab?" · "+P.lab:"";}
+// tabella di confronto per periodo generica: agg(lista) → oggetto, secs = [[titolo,[[riga,f(a)→[testo,valore],verso]]]]
+function perGen(list,agg,secs){
+  var groups={},order=[];
+  list.forEach(function(gp){var pk=perKey(new Date(gp[0].date),sv.per);if(!groups[pk.k]){groups[pk.k]={h:pk.h,list:[]};order.push(pk.k);}groups[pk.k].list.push(gp);});
+  order.sort().reverse();
+  var cols=order.slice(0,12).map(function(k){return {h:groups[k].h,a:agg(groups[k].list)};});
+  return cols.length?ptHtml(cols,secs):"";
+}
+function rP(k,d){return function(a){return a[d]?[fmt(a[k]/a[d]*100)+"%",a[k]/a[d]]:null;};}
+function rA(k,d,dec){return function(a){return a[d]?[fmt(a[k]/a[d],dec),a[k]/a[d]]:null;};}
+function rN(k){return function(a){return a[k]!=null?[a[k],a[k]]:null;};}
 function cellsHtml(c){return c.map(function(x){return '<div><div class="kl">'+x[0]+'</div><div class="kv">'+x[1]+'</div></div>';}).join("");}
 function dd(g){return new Date(g.date).toLocaleDateString("it-IT",{day:"2-digit",month:"short"});}
 function renderStats(){
@@ -1889,7 +1909,7 @@ function renderStats(){
   $("sChips").innerHTML=names.map(function(n){return '<button class="chip'+(n===statSel?" on":"")+'" data-sp="'+esc(n)+'">'+esc(n)+'</button>';}).join("");
   var mine=mineOf(statSel,statMode),extra="",list="",cells=[];
   $("sTgtWrap").hidden=statMode!=="h100"&&statMode!=="one";
-  $("sX01").hidden=statMode!=="x01";
+  $("sX01").hidden=statMode!=="x01";$("sPerTop").innerHTML="";
   $("sClear").textContent="Cancella le partite di "+MODE_NAMES[statMode];
   var none='<div class="small">Ancora nessuna partita conclusa.</div>';
   if(statMode==="x01"){
@@ -1902,13 +1922,14 @@ function renderStats(){
     $("sStart").innerHTML=starts.map(function(v){return '<button class="chip'+(v===sv.start?" on":"")+'" data-ss="'+v+'">'+v+'</button>';}).join("");
     mine=byOut.filter(function(gp){return gp[0].start===sv.start;});
     var stTxt=starts.length?sv.start:(MODE_NAMES.x01);
-    $("sTitle").textContent=stTxt+" · "+OUT_NAMES[sv.out]+" · tutte le partite";
-    var s=statsFor(statSel,mine);
-    cells=[["Media 3 frecce",fmt(s.avg)],["% tripli 20–17",bigPct(mine)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
+    var P=perPick(mine);
+    $("sTitle").textContent=stTxt+" · "+OUT_NAMES[sv.out]+perLabT(P);
+    var s=statsFor(statSel,P.sel);
+    cells=[["Media 3 frecce",fmt(s.avg)],["% tripli 20–17",bigPct(P.sel)],["Partite / vinte",s.games+" / "+s.wins],["Miglior leg",s.best?s.best+" frecce":"—"],
       sv.out==="double"?["% chiusura",s.coPct==null?"—":fmt(s.coPct,0)+'% <span style="font-size:14px;color:var(--mut)">'+s.coH+' su '+s.coA+' frecce</span>']:["Frecce per leg",s.games?fmt(s.darts/s.games):"—"],["Chiusura più alta",s.hiCo||"—"],["Turno più alto",s.hi||"—"],["100+ / 140+ / 180",s.c100+" / "+s.c140+" / "+s.c180]];
     var vb={};mine.forEach(function(gp){gp[0].players.forEach(function(q){var l=botLevel(q.name);if(l){vb[l]=vb[l]||[0,0];vb[l][1]++;if(gp[1].won)vb[l][0]++;}});});
     var lv=Object.keys(vb).sort(function(a,b){return a-b;});
-    if(mine.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+perTable(mine,sv.out)+heatSection(mine);
+    if(mine.length)extra='<div class="sect">Confronto tra periodi</div>'+perTable(mine,sv.out)+heatSection(mine);
     if(lv.length)extra+='<div class="sect">Contro il bot · vinte su giocate</div><div class="dgrid">'+lv.map(function(l){return '<div><b>Liv. '+l+'</b><span>'+vb[l][0]+' su '+vb[l][1]+'</span></div>';}).join("")+'</div>';
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];var vs=g.players.filter(function(x){return x.name!==statSel;}).map(function(x){return x.name;}).join(", ");
       return '<div class="g"><span>'+dd(g)+' · '+g.start+(vs?' vs '+esc(vs):' solo')+(p.won?' · <b style="color:var(--ok)">vinta</b>':'')+'</span><span>media <b>'+fmt(p.darts?p.pts/p.darts*3:0)+'</b> · '+p.darts+' fr.</span></div>';}).join("");
@@ -1918,80 +1939,100 @@ function renderStats(){
     if(statTgt==null||tg.indexOf(statTgt)<0)statTgt=mine.length?mine[mine.length-1][0].target:null;
     $("sTargets").innerHTML=tg.length?tg.map(function(t){return '<button class="chip'+(t===statTgt?" on":"")+'" data-st="'+t+'">'+tName(t)+'</button>';}).join(""):'<span class="small">—</span>';
     var sel=mine.filter(function(gp){return gp[0].target===statTgt;}),cnt={},pts=0,best=0,dts=0;
-    sel.forEach(function(gp){var p=gp[1];pts+=p.pts;best=Math.max(best,p.pts);dts+=p.darts;for(var z in p.cnt)cnt[z]=(cnt[z]||0)+p.cnt[z];});
+    // il riepilogo segue il periodo scelto: l'ultimo giorno/settimana/mese/anno in cui hai giocato su questo numero
+    var PH=perPick(sel),selP=PH.sel,perLab=PH.lab;
+    selP.forEach(function(gp){var p=gp[1];pts+=p.pts;best=Math.max(best,p.pts);dts+=p.darts;for(var z in p.cnt)cnt[z]=(cnt[z]||0)+p.cnt[z];});
     var b=hBreak(cnt,statTgt);
-    $("sTitle").textContent="100 frecce"+(statTgt!=null?" sul "+tName(statTgt):"");
-    cells=[["Sessioni",sel.length],["Punti medi",sel.length?fmt(pts/sel.length,0):"—"],["Miglior punteggio",sel.length?best:"—"],["A segno",pct(b.on,dts)]];
+    $("sTitle").textContent="100 frecce"+(statTgt!=null?" sul "+tName(statTgt):"")+(selP.length?" · "+perLab:"");
+    cells=[["Sessioni",selP.length],["Punti medi",selP.length?fmt(pts/selP.length,1):"—"],["Miglior punteggio",selP.length?best:"—"],["A segno",pct(b.on,dts)]];
     if(statTgt!==25)cells.push(["Tripli",pct(b.T,dts)]);
     cells.push(["Doppi",pct(b.D,dts)],["Singoli",pct(b.S,dts)],["Fuori",pct(b.miss,dts)]);
-    if(sel.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+h100PerTable(sel,statTgt)+
-      '<div class="sect">Dove finiscono le frecce · '+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>'+heatSection(sel,cntH100);
+    if(sel.length)extra='<div class="sect">Confronto tra periodi</div>'+h100PerTable(sel,statTgt)+
+      '<div class="sect">Dove finiscono le frecce · '+(selP.length?perLab+' · ':'')+dts+' frecce</div><div class="tw sumt">'+brkHtml(b,dts,statTgt)+'</div>'+heatSection(sel,cntH100);
     list=sel.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1],bb=hBreak(p.cnt,g.target);
       return '<div class="g"><span>'+dd(g)+' · sul '+tName(g.target)+'</span><span><b>'+p.pts+'</b> punti · '+pct(bb.on,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="rtws"){
-    $("sTitle").textContent="Giro del mondo a punti · tutte le sessioni";
-    var A=rtwsAgg(mine);
+    var P=perPick(mine);
+    $("sTitle").textContent="Giro del mondo a punti"+perLabT(P);
+    var A=rtwsAgg(P.sel);
     cells=[["Sessioni",A.n],["Punti medi",A.n?fmt(A.pts/A.n,1):"—"],["Record",A.mx.pts!=null?A.mx.pts:"—"],["A segno",pct(A.on,A.darts)],
       ["Tripli",pct(A.T,A.darts)],["Doppi",pct(A.D,A.darts)],["Singoli",pct(A.S,A.darts)],["Mancati",pct(A.M,A.darts)]];
-    if(mine.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+rtwsPerTable(mine);
+    if(mine.length)extra='<div class="sect">Confronto tra periodi</div>'+rtwsPerTable(mine);
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+'</span><span><b>'+p.pts+'</b> punti · '+pct(p.S+p.D+p.T,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="rtc"){
-    $("sTitle").textContent="Giro del mondo";
-    var fin=mine.filter(function(gp){return gp[1].done;}),bestD=null,sumD=0,h=0,d=0,per=[],perN=[];
+    var P=perPick(mine);
+    $("sTitle").textContent="Giro del mondo"+perLabT(P);
+    var fin=P.sel.filter(function(gp){return gp[1].done;}),bestD=null,sumD=0,h=0,d=0,per=[],perN=[];
     fin.forEach(function(gp){var p=gp[1];sumD+=p.darts;if(bestD==null||p.darts<bestD)bestD=p.darts;});
-    mine.forEach(function(gp){var p=gp[1];h+=p.hits;d+=p.darts;(p.per||[]).forEach(function(c,i){if(i<p.reached||p.done){per[i]=(per[i]||0)+c;perN[i]=(perN[i]||0)+1;}});});
-    cells=[["Partite / completate",mine.length+" / "+fin.length],["Miglior giro",bestD?bestD+" frecce":"—"],["Media frecce",fin.length?fmt(sumD/fin.length,0):"—"],["A segno",pct(h,d)]];
+    P.sel.forEach(function(gp){var p=gp[1];h+=p.hits;d+=p.darts;(p.per||[]).forEach(function(c,i){if(i<p.reached||p.done){per[i]=(per[i]||0)+c;perN[i]=(perN[i]||0)+1;}});});
+    cells=[["Partite / completate",P.sel.length+" / "+fin.length],["Miglior giro",bestD?bestD+" frecce":"—"],["Media frecce",fin.length?fmt(sumD/fin.length,0):"—"],["A segno",pct(h,d)]];
     var avg=per.map(function(c,i){return [tName(RTC[i]),perN[i]?c/perN[i]:0];}).filter(function(x){return x[1];}).sort(function(a,b){return b[1]-a[1];});
-    if(avg.length)extra='<div class="sect">Frecce medie per numero (dal più difficile)</div><div class="dgrid">'+avg.map(function(x){return '<div><b>'+x[0]+'</b><span>'+fmt(x[1])+'</span></div>';}).join("")+'</div>';
+    function rtcAgg(l){var a={n:l.length,fin:0,sumD:0,best:null,h:0,d:0};l.forEach(function(gp){var p=gp[1];a.h+=p.hits;a.d+=p.darts;if(p.done){a.fin++;a.sumD+=p.darts;if(a.best==null||p.darts<a.best)a.best=p.darts;}});return a;}
+    if(mine.length)extra='<div class="sect">Confronto tra periodi</div>'+perGen(mine,rtcAgg,[["Partite",[["Partite",function(a){return [a.n,null];}],["Completate",rN("fin"),1]]],
+      ["Frecce per completare",[["Media",rA("sumD","fin"),-1],["Miglior giro",rN("best"),-1]]],["Precisione",[["A segno",rP("h","d"),1],["Frecce tirate",function(a){return [a.d,null];}]]]]);
+    if(avg.length)extra+='<div class="sect">Frecce medie per numero (dal più difficile)</div><div class="dgrid">'+avg.map(function(x){return '<div><b>'+x[0]+'</b><span>'+fmt(x[1])+'</span></div>';}).join("")+'</div>';
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+(p.done?' · completato':' · fermo al '+tName(RTC[p.reached]))+'</span><span><b>'+p.darts+'</b> frecce · '+pct(p.hits,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="b27"){
-    $("sTitle").textContent="Bob's 27";
+    var P=perPick(mine);
+    $("sTitle").textContent="Bob's 27"+perLabT(P);
     var sc=0,bs=null,comp=0,hh=0,dk=0,ph=[],pa=[];
-    mine.forEach(function(gp){var p=gp[1];sc+=p.score;if(bs==null||p.score>bs)bs=p.score;if(!p.out)comp++;hh+=p.hits;dk+=p.darts;
+    P.sel.forEach(function(gp){var p=gp[1];sc+=p.score;if(bs==null||p.score>bs)bs=p.score;if(!p.out)comp++;hh+=p.hits;dk+=p.darts;
       for(var i=0;i<p.reached;i++){pa[i]=(pa[i]||0)+1;ph[i]=(ph[i]||0)+((p.per||[])[i]||0);}});
-    cells=[["Partite",mine.length],["Punteggio medio",mine.length?fmt(sc/mine.length,0):"—"],["Record",bs==null?"—":bs],["Completate",mine.length?comp+" su "+mine.length:"—"],["Doppi a segno",pct(hh,dk)]];
-    if(pa.length)extra='<div class="sect">% a segno per doppio</div><div class="dgrid">'+B27.map(function(n,i){return pa[i]?'<div><b>'+dName(n)+'</b><span>'+pct(ph[i],pa[i]*3)+'</span></div>':'';}).join("")+'</div>';
+    cells=[["Partite",P.sel.length],["Punteggio medio",P.sel.length?fmt(sc/P.sel.length,0):"—"],["Record",bs==null?"—":bs],["Completate",P.sel.length?comp+" su "+P.sel.length:"—"],["Doppi a segno",pct(hh,dk)]];
+    function b27Agg(l){var a={n:l.length,sc:0,best:null,comp:0,h:0,d:0};l.forEach(function(gp){var p=gp[1];a.sc+=p.score;if(a.best==null||p.score>a.best)a.best=p.score;if(!p.out)a.comp++;a.h+=p.hits;a.d+=p.darts;});return a;}
+    if(mine.length)extra='<div class="sect">Confronto tra periodi</div>'+perGen(mine,b27Agg,[["Partite",[["Partite",function(a){return [a.n,null];}],["Completate",rN("comp"),1]]],
+      ["Punteggio",[["Punteggio medio",rA("sc","n",0),1],["Record",rN("best"),1]]],["Precisione",[["Doppi a segno",rP("h","d"),1]]]]);
+    if(pa.length)extra+='<div class="sect">% a segno per doppio</div><div class="dgrid">'+B27.map(function(n,i){return pa[i]?'<div><b>'+dName(n)+'</b><span>'+pct(ph[i],pa[i]*3)+'</span></div>':'';}).join("")+'</div>';
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+(p.out?' · sotto zero su '+dName(B27[p.reached-1]):' · completato')+'</span><span><b>'+p.score+'</b> punti · '+pct(p.hits,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="vline"){
-    $("sTitle").textContent="Linea verticale · tutte le sessioni";
-    var V={n:0,d:0,c:0,on:0,L:0,R:0,M:0,per:{}};
-    mine.forEach(function(gp){var p=gp[1];V.n++;V.d+=p.darts;V.c+=p.line;V.on+=p.on;V.L+=p.L;V.R+=p.R;V.M+=p.miss;
-      for(var k in p.per){V.per[k]=V.per[k]||[0,0];V.per[k][0]+=p.per[k][0];V.per[k][1]+=p.per[k][1];}});
+    var P=perPick(mine);
+    $("sTitle").textContent="Linea verticale"+perLabT(P);
+    function vlAgg(l){var V={n:0,d:0,c:0,on:0,L:0,R:0,M:0,per:{}};
+      l.forEach(function(gp){var p=gp[1];V.n++;V.d+=p.darts;V.c+=p.line;V.on+=p.on;V.L+=p.L;V.R+=p.R;V.M+=p.miss;
+        for(var k in p.per){V.per[k]=V.per[k]||[0,0];V.per[k][0]+=p.per[k][0];V.per[k][1]+=p.per[k][1];}});return V;}
+    var V=vlAgg(P.sel);
     cells=[["Sessioni",V.n],["Sulla linea",pct(V.c,V.d)],["A sinistra",pct(V.L,V.d)],["A destra",pct(V.R,V.d)],["A segno",pct(V.on,V.d)],["Fuori",pct(V.M,V.d)]];
     if(mine.length)extra='<div class="sect">A segno per bersaglio</div><div class="dgrid">'+VL.map(function(n){var x=V.per[String(n)]||[0,0];return '<div><b>'+tName(n)+'</b><span>'+pct(x[0],x[1])+'</span></div>';}).join("")+'</div>'+
-      '<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+heatSection(mine,cntH100);
+      '<div class="sect">Confronto tra periodi</div>'+perGen(mine,vlAgg,[["Sessioni",[["Sessioni",function(a){return [a.n,null];}],["Frecce",function(a){return [a.d,null];}]]],
+        ["% di precisione",[["Sulla linea",rP("c","d"),1],["A sinistra",rP("L","d"),-1],["A destra",rP("R","d"),-1],["A segno",rP("on","d"),1],["Fuori",rP("M","d"),-1]]]])+heatSection(mine,cntH100);
     list=mine.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+' · '+g.rounds+' giri</span><span>linea <b>'+pct(p.line,p.darts)+'</b> · sx '+pct(p.L,p.darts)+' · dx '+pct(p.R,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="one"){
     var tg1=[];mine.forEach(function(gp){if(tg1.indexOf(gp[0].target)<0)tg1.push(gp[0].target);});tg1.sort(function(a,b){return a-b;});
     if(statTgt==null||tg1.indexOf(statTgt)<0)statTgt=mine.length?mine[mine.length-1][0].target:null;
     $("sTargets").innerHTML=tg1.length?tg1.map(function(t){return '<button class="chip'+(t===statTgt?" on":"")+'" data-st="'+t+'">'+tName(t)+'</button>';}).join(""):'<span class="small">—</span>';
-    var sel1=mine.filter(function(gp){return gp[0].target===statTgt;}),O={d:0,pts:0,h:0,T:0,best:null};
-    sel1.forEach(function(gp){var p=gp[1];O.d+=p.darts;O.pts+=p.pts;O.h+=p.hits;O.T+=p.T;var a=p.darts?p.pts/p.darts:0;if(O.best==null||a>O.best)O.best=a;});
-    $("sTitle").textContent="Prima freccia"+(statTgt!=null?" sul "+(statTgt===25?"bull":"T"+statTgt):"");
-    cells=[["Sessioni",sel1.length],["Media per freccia",O.d?fmt(O.pts/O.d):"—"],["Miglior sessione",O.best!=null?fmt(O.best):"—"],["A segno",pct(O.h,O.d)],[statTgt===25?"Centro":"Tripli",pct(O.T,O.d)],["Frecce",O.d]];
-    if(sel1.length)extra='<div class="sect">Per periodo</div><div class="seg" id="sPer">'+["d","w","m","y"].map(function(k){return '<button data-per="'+k+'"'+(k===sv.per?' class="on"':'')+'>'+PER_NAMES[k]+'</button>';}).join("")+'</div>'+heatSection(sel1,cntH100);
+    var sel1=mine.filter(function(gp){return gp[0].target===statTgt;}),P=perPick(sel1);
+    function oneAgg(l){var O={n:l.length,d:0,pts:0,h:0,T:0,best:null};l.forEach(function(gp){var p=gp[1];O.d+=p.darts;O.pts+=p.pts;O.h+=p.hits;O.T+=p.T;var a=p.darts?p.pts/p.darts:0;if(O.best==null||a>O.best)O.best=a;});return O;}
+    var O=oneAgg(P.sel);
+    $("sTitle").textContent="Prima freccia"+(statTgt!=null?" sul "+(statTgt===25?"bull":"T"+statTgt):"")+perLabT(P);
+    cells=[["Sessioni",P.sel.length],["Media per freccia",O.d?fmt(O.pts/O.d):"—"],["Miglior sessione",O.best!=null?fmt(O.best):"—"],["A segno",pct(O.h,O.d)],[statTgt===25?"Centro":"Tripli",pct(O.T,O.d)],["Frecce",O.d]];
+    if(sel1.length)extra='<div class="sect">Confronto tra periodi</div>'+perGen(sel1,oneAgg,[["Sessioni",[["Sessioni",function(a){return [a.n,null];}],["Frecce",function(a){return [a.d,null];}]]],
+      ["Punteggio medio",[["Media per freccia",rA("pts","d",2),1],["Miglior sessione",function(a){return a.best!=null?[fmt(a.best,2),a.best]:null;},1]]],
+      ["% di precisione",[["A segno",rP("h","d"),1],[statTgt===25?"Centro":"Tripli",rP("T","d"),1]]]])+heatSection(sel1,cntH100);
     list=sel1.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+' · '+p.darts+' frecce</span><span>media <b>'+fmt(p.darts?p.pts/p.darts:0)+'</b> · '+pct(p.hits,p.darts)+'</span></div>';}).join("");
   }
   if(statMode==="chk"){
     if(!sv.cko||!CHK_OUT[sv.cko])sv.cko=mine.length?mine[mine.length-1][0].out:"master";
-    var selC=mine.filter(function(gp){return gp[0].out===sv.cko;}),F={},tot=0,okc=0,dk=0,byN={};
+    var selAll=mine.filter(function(gp){return gp[0].out===sv.cko;}),P=perPick(selAll),selC=P.sel,F={},tot=0,okc=0,dk=0,byN={};
     var FAS=[["2–40",2,40],["41–80",41,80],["81–120",81,120],["121–170",121,170]];
     selC.forEach(function(gp){gp[1].res.forEach(function(r){tot++;var f=FAS.filter(function(x){return r[0]>=x[1]&&r[0]<=x[2];})[0];f=f?f[0]:"?";
       F[f]=F[f]||[0,0,0];F[f][1]++;if(r[1]){okc++;dk+=r[2];F[f][0]++;F[f][2]+=r[2];}
       byN[r[0]]=byN[r[0]]||[0,0];byN[r[0]][1]++;if(r[1])byN[r[0]][0]++;});});
-    $("sTitle").textContent="Chiusure · "+CHK_OUT[sv.cko];
+    $("sTitle").textContent="Chiusure · "+CHK_OUT[sv.cko]+perLabT(P);
+    function chkAgg(l){var a={n:l.length,t:0,ok:0,dk:0};l.forEach(function(gp){gp[1].res.forEach(function(r){a.t++;if(r[1]){a.ok++;a.dk+=r[2];}});});return a;}
     cells=[["Sessioni",selC.length],["Numeri provati",tot],["Chiusi",pct(okc,tot)],["Frecce per chiusura",okc?fmt(dk/okc):"—"]];
     var hard=Object.keys(byN).map(function(k){return [k,byN[k]];}).filter(function(x){return x[1][1]>=2&&x[1][0]<x[1][1];}).sort(function(a,b){return a[1][0]/a[1][1]-b[1][0]/b[1][1]||b[1][1]-a[1][1];}).slice(0,8);
     extra='<div class="sect">Chiusura</div><div class="seg">'+["single","master","double"].map(function(o){return '<button data-cko="'+o+'"'+(o===sv.cko?' class="on"':'')+'>'+OUT_NAMES[o]+'</button>';}).join("")+'</div>'+
-      (tot?'<div class="sect">Per fascia di numeri</div><div class="tw sumt"><table><tr><th>Numeri</th><th>Provati</th><th>Chiusi</th><th>Frecce per chiusura</th></tr>'+
+      (selAll.length?'<div class="sect">Confronto tra periodi</div>'+perGen(selAll,chkAgg,[["Sessioni",[["Sessioni",function(a){return [a.n,null];}],["Numeri provati",function(a){return [a.t,null];}]]],
+        ["Chiusure",[["Chiusi",rP("ok","t"),1],["Frecce per chiusura",rA("dk","ok"),-1]]]]):'')+
+      (tot?'<div class="sect">Per fascia di numeri'+perLabT(P)+'</div><div class="tw sumt"><table><tr><th>Numeri</th><th>Provati</th><th>Chiusi</th><th>Frecce per chiusura</th></tr>'+
         FAS.filter(function(x){return F[x[0]];}).map(function(x){var f=F[x[0]];return '<tr><td>'+x[0]+'</td><td>'+f[1]+'</td><td>'+pct(f[0],f[1])+'</td><td>'+(f[0]?fmt(f[2]/f[0]):'—')+'</td></tr>';}).join("")+'</table></div>':'')+
       (hard.length?'<div class="sect">Numeri più difficili (provati almeno 2 volte)</div><div class="dgrid">'+hard.map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1][0]+' su '+x[1][1]+'</span></div>';}).join("")+'</div>':'');
-    list=selC.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+' · '+g.range+' · '+g.dpn+' frecce</span><span>chiusi <b>'+p.ok+'</b> su '+p.n+'</span></div>';}).join("");
+    list=selAll.slice(-15).reverse().map(function(gp){var g=gp[0],p=gp[1];return '<div class="g"><span>'+dd(g)+' · '+g.range+' · '+g.dpn+' frecce</span><span>chiusi <b>'+p.ok+'</b> su '+p.n+'</span></div>';}).join("");
   }
   $("sGrid").innerHTML=cellsHtml(cells);
   $("sExtra").innerHTML=extra;
@@ -2002,6 +2043,7 @@ $("sModes").addEventListener("click",function(e){var c=e.target.closest("[data-s
 $("sTargets").addEventListener("click",function(e){var c=e.target.closest("[data-st]");if(c){statTgt=+c.dataset.st;renderStats();}});
 $("sOut").addEventListener("click",function(e){var c=e.target.closest("[data-so]");if(c){sv.out=c.dataset.so;svSave();renderStats();}});
 $("sStart").addEventListener("click",function(e){var c=e.target.closest("[data-ss]");if(c){sv.start=+c.dataset.ss;svSave();renderStats();}});
+$("sPerTop").addEventListener("click",function(e){var c=e.target.closest("[data-per]");if(c){sv.per=c.dataset.per;heatK=null;svSave();renderStats();}});
 $("sExtra").addEventListener("click",function(e){var c=e.target.closest("[data-per]");if(c){sv.per=c.dataset.per;heatK=null;svSave();renderStats();return;}
   var ck=e.target.closest("[data-cko]");if(ck){sv.cko=ck.dataset.cko;svSave();var y0=$("vStats").scrollTop;renderStats();$("vStats").scrollTop=y0;return;}
   var h=e.target.closest("[data-hk]");if(h){heatK=h.dataset.hk;var y=$("vStats").scrollTop;renderStats();$("vStats").scrollTop=y;}});
