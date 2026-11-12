@@ -1764,6 +1764,12 @@ function h100PerTable(sel,target){
   function D(f){return function(a){return a.det?f(a):null;};}
   function avg(f){return function(a){return a.n?[fmt(f(a)/a.n),f(a)/a.n]:null;};}
   var secs=[["Sessioni",[["Sessioni",function(a){return [a.n,null];}]]]];
+  // punteggio medio del periodo (per sessione e per freccia), con le due metà della sessione
+  secs.push(["Punteggio medio",[["Punti a sessione",avg(function(a){return a.pts;}),1],
+    ["Punti a freccia",function(a){return a.darts?[fmt(a.pts/a.darts,2),a.pts/a.darts]:null;},1],
+    ["Prime 50 frecce",D(function(a){return [fmt(a.p1/a.det),a.p1/a.det];}),1],
+    ["Seconde 50 frecce",D(function(a){return [fmt(a.p2/a.det),a.p2/a.det];}),1],
+    ["Punti totali",function(a){return [a.pts,null];}]]]);
   secs.push(["% di precisione",[["A segno",P(function(a){return a.on;}),1]].concat(bull?[]:[["Tripli",P(function(a){return a.T;}),1]]).concat([
     ["Doppi",P(function(a){return a.D;}),1],["Singoli",P(function(a){return a.S;}),1],["Mancati",P(function(a){return a.M;}),-1]])]);
   secs.push(["Frecce",[["Tirate",function(a){return [a.darts,null];}],["A segno",N(function(a){return a.on;}),1]].concat(bull?[]:[["Tripli",N(function(a){return a.T;}),1]]).concat([
